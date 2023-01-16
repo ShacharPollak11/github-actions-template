@@ -5,10 +5,10 @@ on:
     inputs:
       values_files_paths:
         required: true
-        type: boolean
+        type: string
         default: false
 
-env: 
+env:
   aws_region:  us-east-1
 
 permissions:
