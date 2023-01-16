@@ -6,7 +6,6 @@ on:
       values_files_paths:
         required: true
         type: string
-        default: false
 
 env:
   aws_region:  us-east-1
@@ -52,9 +51,9 @@ jobs:
           sed -i "s,environment:.*,environment:\ ${{ github.ref_name }}," helm/umbrella/common.yaml
 
           export IFS=";"
-          sentence="helm/services/provider/values.yaml;helm/services/bff/values.yaml"
           for values_file_path in ${{ inputs.values_files_paths }}; do
-            sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," ${{ inputs.values_file_path }}
+            echo "values_file_path: "
+            sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," $values_file_path
           done
 
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
