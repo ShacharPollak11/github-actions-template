@@ -32,7 +32,7 @@ jobs:
 
       - name: Delete branch from argocd repo
         run: |
-          git branch origin -d ${{ github.event.ref }}
+          git push origin -d ${{ github.event.ref }}
       
       - name: Delete applicationset from argocd namespace
         run: |
