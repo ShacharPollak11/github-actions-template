@@ -46,8 +46,8 @@ jobs:
           echo "short sha: $short_sha"
 
           echo "updating and replace place holders in branch-generator-template.yaml"
-          sed -i "s,{branch},${{ github.ref_name }}," ./application-set/branch-generator-template.yaml
-          sed -i "s,{repo},${{ github.event.repository.name }}," ./application-set/branch-generator-template.yaml
+          sed -i "s,{branch},${{ github.ref_name }}," ./applicationSets/branch-generator-template.yaml
+          sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
           sed -i "s,environment:.*,environment:\ ${{ github.ref_name }}," helm/umbrella/common.yaml
 
           echo "update image tag in values files"
@@ -58,7 +58,7 @@ jobs:
           done
 
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          kubectl apply -f ./application-set/branch-generator-template.yaml
+          kubectl apply -f ./applicationSets/branch-generator-template.yaml
           
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - ${{ github.ref_name }}"
