@@ -1,4 +1,4 @@
-name: CI service
+name: Update-argocd-applicationset
 
 on:
   workflow_call:
