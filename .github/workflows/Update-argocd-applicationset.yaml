@@ -45,13 +45,14 @@ jobs:
           short_sha=$(git rev-parse --short "$GITHUB_SHA")
           echo "short sha: $short_sha"
 
-          echo "updating image tag in values file and replace holders in branch-generator-template.yaml"
+          echo "updating and replace place holders in branch-generator-template.yaml"
           sed -i "s,{branch},${{ github.ref_name }}," ./application-set/branch-generator-template.yaml
           sed -i "s,{repo},${{ github.event.repository.name }}," ./application-set/branch-generator-template.yaml
           sed -i "s,environment:.*,environment:\ ${{ github.ref_name }}," helm/umbrella/common.yaml
 
-          export IFS=";"
-          for values_file_path in ${{ inputs.values_files_paths }}; do
+          echo "update image tag in values files"
+          IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
+          for values_file_path in ${values_files_array[@]}; do
             echo "values_file_path: $values_file_path"
             sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," $values_file_path
           done
