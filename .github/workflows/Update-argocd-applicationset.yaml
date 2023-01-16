@@ -1,0 +1,65 @@
+name: CI service
+
+on:
+  workflow_call:
+    inputs:
+      values_files_paths:
+        required: true
+        type: boolean
+        default: false
+
+env:
+  aws_region:  us-east-1
+
+permissions:
+  contents: read
+
+jobs:
+  create-branch-and-update-application-set-in-argocd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List environment variables 
+        run: env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+
+      - name: create branch in argocd repo
+        run: |
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+          git fetch
+          git branch -a
+          ls
+          pwd
+          git checkout ${{ github.ref_name }} 2>/dev/null || git checkout -b ${{ github.ref_name }}
+
+          short_sha=$(git rev-parse --short "$GITHUB_SHA")
+          echo "short sha: $short_sha"
+
+          echo "updating image tag in values file and replace holders in branch-generator-template.yaml"
+          sed -i "s,{branch},${{ github.ref_name }}," ./application-set/branch-generator-template.yaml
+          sed -i "s,{repo},${{ github.event.repository.name }}," ./application-set/branch-generator-template.yaml
+          sed -i "s,environment:.*,environment:\ ${{ github.ref_name }}," helm/umbrella/common.yaml
+
+          export IFS=";"
+          sentence="helm/services/provider/values.yaml;helm/services/bff/values.yaml"
+          for values_file_path in ${{ inputs.values_files_paths }}; do
+            sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," ${{ inputs.values_file_path }}
+          done
+
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          kubectl apply -f ./application-set/branch-generator-template.yaml
+          
+          git add -A 
+          git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - ${{ github.ref_name }}"
+          git push --set-upstream origin ${{ github.ref_name }}
