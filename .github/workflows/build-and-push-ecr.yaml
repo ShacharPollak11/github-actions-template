@@ -60,8 +60,19 @@ jobs:
       - name: Docker build and push
         run: |
                short_sha=$(git rev-parse --short "$GITHUB_SHA")
+               echo "${{ inputs.ecr_registry }}/{{ inputs.service_name }}:${{ github.ref_name }}-$short_sha"
+               
                docker buildx build \
                -o type=registry \
-               -t ${{ inputs.ecr_registry }}/{{ inputs.service_name }}:${{ github.ref_name }}-$short_sha \
+               -t "${{ inputs.ecr_registry }}/{{ inputs.service_name }}:${{ github.ref_name }}-$short_sha" \
                -f {{ inputs.dockerfile_path }} \
                {{ inputs.context_path }} \
+
+      - name: Docker build and push
+        run: |
+               short_sha=$(git rev-parse --short "$GITHUB_SHA")
+               docker buildx build \
+               -o type=registry \
+               -t ${{ env.ecr-repo-provider }}:${{ github.ref_name }}-$short_sha  \
+               -f SOW2/SoW2/Provider/Dockerfile \
+               SOW2/SoW2
