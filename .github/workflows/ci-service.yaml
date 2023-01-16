@@ -28,11 +28,11 @@ on:
       enable-snyk:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-sonar:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-resharper:
         required: false
         type: boolean
@@ -40,7 +40,7 @@ on:
       enable-ecr:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-jfrog:
         required: false
         type: boolean
