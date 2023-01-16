@@ -52,7 +52,7 @@ jobs:
 
           export IFS=";"
           for values_file_path in ${{ inputs.values_files_paths }}; do
-            echo "values_file_path: "
+            echo "values_file_path: $values_file_path"
             sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," $values_file_path
           done
 
