@@ -62,6 +62,6 @@ jobs:
                short_sha=$(git rev-parse --short "$GITHUB_SHA")
                docker buildx build \
                -o type=registry \
-               -t ${{ inputs.service_name }}:${{ github.ref_name }}-$short_sha \
+               -t ${{ inputs.ecr_registry }}/{{ inputs.service_name }}:${{ github.ref_name }}-$short_sha \
                -f {{ inputs.dockerfile_path }} \
-               SOW2/SoW2
+               {{ inputs.context_path }} \
