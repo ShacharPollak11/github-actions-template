@@ -35,26 +35,39 @@ jobs:
 
       - name: create branch in argocd repo
         run: |
+          if [ -z "$GITHUB_HEAD_REF" ]; then
+            echo "We are NOT IN a pull request"
+            echo "replace all slashes in branch name"
+            echo "branch name before replace: ${{ github.ref_name }}"
+            branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          else
+            echo "We are IN a pull request"
+            echo "replace all slashes in branch name"
+            echo "branch name before replace: ${{ github.ref_name }}"
+            branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+          fi
+
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
           git branch -a
           ls
           pwd
-          git checkout ${{ github.ref_name }} 2>/dev/null || git checkout -b ${{ github.ref_name }}
+
+          git checkout $branch_without_slashes 2>/dev/null || git checkout -b $branch_without_slashes
 
           short_sha=$(git rev-parse --short "$GITHUB_SHA")
           echo "short sha: $short_sha"
 
           echo "updating and replace place holders in branch-generator-template.yaml"
-          sed -i "s,{branch},${{ github.ref_name }}," ./applicationSets/branch-generator-template.yaml
+          sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
           sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
-          sed -i "s,environment:.*,environment:\ ${{ github.ref_name }}," helm/umbrella/common.yaml
+          sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
 
           echo "update image tag in values files"
           IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
           for values_file_path in ${values_files_array[@]}; do
             echo "values_file_path: $values_file_path"
-            sed -i "s,tag:.*,tag:\ ${{ github.ref_name }}-$short_sha," $values_file_path
+            sed -i "s,tag:.*,tag:\ $branch_without_slashes-$short_sha," $values_file_path
           done
 
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}

@@ -40,14 +40,15 @@ jobs:
       - name: Delete applicationset from argocd namespace
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          if kubectl get appset ${{ github.event.repository.name }}-${{ github.event.ref }} -n argocd  &> /dev/null; 
+          branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
+          if kubectl get appset ${{ github.event.repository.name }}-$branch_without_slashes -n argocd  &> /dev/null; 
           then
-            kubectl delete appset ${{ github.event.repository.name }}-${{ github.event.ref }} -n argocd; 
+            kubectl delete appset ${{ github.event.repository.name }}-$branch_without_slashes -n argocd; 
           fi
       
       - name: Delete namespace from kubernetes
         run: |
-          if kubectl get namespace ${{ github.event.repository.name }}-${{ github.event.ref }} &> /dev/null; 
+          if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
           then 
-            kubectl delete namespace ${{ github.event.repository.name }}-${{ github.event.ref }}; 
+            kubectl delete namespace ${{ github.event.repository.name }}-$branch_without_slashes; 
           fi
