@@ -59,22 +59,33 @@ jobs:
       
       - name: Docker build and push
         run: |
-               if [ -z "$GITHUB_HEAD_REF" ]; then
-                 echo "We are NOT IN a pull request"
-                 echo "replace all slashes in branch name"
-                 echo "branch name before replace: ${{ github.ref_name }}"
-                 branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-               else
-                 echo "We are IN a pull request"
-                 echo "replace all slashes in branch name"
-                 echo "branch name before replace: ${{ github.ref_name }}"
-                 branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
-               fi
-               short_sha=$(git rev-parse --short "$GITHUB_SHA")
-               echo "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes-$short_sha"
+            short_sha=$(git rev-parse --short "$GITHUB_SHA")
+            echo "short_sha: $short_sha"
 
-               docker buildx build \
-               -o type=registry \
-               -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes-$short_sha" \
-               -f ${{ inputs.dockerfile_path }} \
-               ${{ inputs.context_path }} \
+            echo "replace all slashes in branch name"
+            if [ -z "$GITHUB_HEAD_REF" ]; then
+              echo "We are NOT IN a pull request"
+              branch_with_slashes=${{ github.ref_name }}
+              branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+            else
+              echo "We are IN a pull request"
+              branch_with_slashes=${{ github.head_ref }}
+              branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+            fi
+            echo "branch_without_slashes: $branch_without_slashes"
+            echo "branch_with_slashes: $branch_with_slashes"
+
+            if [ "${{ github.head_ref }}" == "dev" ]; then
+              echo "We are in dev branch"
+              image_tag=dev
+            else
+              image_tag=$branch_without_slashes-$short_sha
+            fi
+            echo "image_tag: $image_tag"
+            echo "Target: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$image_tag"
+
+            docker buildx build \
+            -o type=registry \
+            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$image_tag" \
+            -f ${{ inputs.dockerfile_path }} \
+            ${{ inputs.context_path }} \
