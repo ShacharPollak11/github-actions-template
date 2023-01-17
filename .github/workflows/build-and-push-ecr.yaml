@@ -59,11 +59,22 @@ jobs:
       
       - name: Docker build and push
         run: |
+               if [ -z "$GITHUB_HEAD_REF" ]; then
+                 echo "We are NOT IN a pull request"
+                 echo "replace all slashes in branch name"
+                 echo "branch name before replace: ${{ github.ref_name }}"
+                 branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+               else
+                 echo "We are IN a pull request"
+                 echo "replace all slashes in branch name"
+                 echo "branch name before replace: ${{ github.ref_name }}"
+                 branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+               fi
                short_sha=$(git rev-parse --short "$GITHUB_SHA")
-               echo "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:${{ github.ref_name }}-$short_sha"
+               echo "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes-$short_sha"
 
                docker buildx build \
                -o type=registry \
-               -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:${{ github.ref_name }}-$short_sha" \
+               -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes-$short_sha" \
                -f ${{ inputs.dockerfile_path }} \
                ${{ inputs.context_path }} \
