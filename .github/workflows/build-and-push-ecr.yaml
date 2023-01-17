@@ -75,7 +75,7 @@ jobs:
             echo "branch_without_slashes: $branch_without_slashes"
             echo "branch_with_slashes: $branch_with_slashes"
 
-            if [ "${{ github.head_ref }}" == "dev" ]; then
+            if [ "${{ github.ref_name }}" == "dev" ]; then
               echo "We are in dev branch"
               image_tag=dev
             else
