@@ -30,7 +30,7 @@ jobs:
           repository: brightsource-il/argocd
           token: ${{ secrets.REPO_ACCESS_ARGOCD }}
 
-      - name: helm install airflow
+      - name: helm uninstall airflow
         run: |
             aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
             
@@ -38,3 +38,8 @@ jobs:
             namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
             
             helm uninstall airflow --namespace $namespace
+
+            if kubectl get namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
+            then 
+              kubectl delete namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes; 
+            fi
