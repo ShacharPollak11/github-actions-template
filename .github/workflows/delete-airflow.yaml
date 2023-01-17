@@ -11,6 +11,7 @@ env:
 
 jobs:
   delete_airflow:
+    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     name: delete airflow
     steps:
@@ -34,7 +35,7 @@ jobs:
         run: |
             aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
             
-            branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+            branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
             namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
             
             helm uninstall airflow --namespace $namespace
