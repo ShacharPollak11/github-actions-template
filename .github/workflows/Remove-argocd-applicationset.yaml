@@ -32,12 +32,22 @@ jobs:
 
       - name: Delete branch from argocd repo
         run: |
-          git push origin -d ${{ github.event.ref }}
+          if git rev-parse --verify --quiet origin/${{ github.event.ref }}; 
+          then
+            git push origin --delete ${{ github.event.ref }}; 
+          fi
       
       - name: Delete applicationset from argocd namespace
         run: |
-          kubectl delete appset ${{ github.event.repository.name }}-${{ github.event.ref }} -n argocd
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          if kubectl get appset ${{ github.event.repository.name }}-${{ github.event.ref }} -n argocd  &> /dev/null; 
+          then
+            kubectl delete appset ${{ github.event.repository.name }}-${{ github.event.ref }} -n argocd; 
+          fi
       
       - name: Delete namespace from kubernetes
         run: |
-          kubectl delete namespace ${{ github.event.repository.name }}-${{ github.event.ref }}
+          if kubectl get namespace ${{ github.event.repository.name }}-${{ github.event.ref }} &> /dev/null; 
+          then 
+            kubectl delete namespace ${{ github.event.repository.name }}-${{ github.event.ref }}; 
+          fi
