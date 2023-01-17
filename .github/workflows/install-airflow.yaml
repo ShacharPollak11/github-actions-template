@@ -11,9 +11,8 @@ env:
 
 jobs:
   install_airflow:
-    if: ${{ inputs.enable-ecr }}
     runs-on: ubuntu-latest
-    name: Service build and push to AWS ECR
+    name: install airflow
     steps:
       - name: List environment variables 
         run: env
