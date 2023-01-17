@@ -35,17 +35,18 @@ jobs:
 
       - name: create branch in argocd repo
         run: |
+          echo "replace all slashes in branch name"
           if [ -z "$GITHUB_HEAD_REF" ]; then
             echo "We are NOT IN a pull request"
-            echo "replace all slashes in branch name"
-            echo "branch name before replace: ${{ github.ref_name }}"
+            branch_with_slashes=${{ github.ref_name }}
             branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
           else
             echo "We are IN a pull request"
-            echo "replace all slashes in branch name"
-            echo "branch name before replace: ${{ github.ref_name }}"
+            branch_with_slashes=${{ github.head_ref }}
             branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
           fi
+          echo "branch_without_slashes: $branch_without_slashes"
+          echo "branch_with_slashes: $branch_with_slashes"
 
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
@@ -74,5 +75,5 @@ jobs:
           kubectl apply -f ./applicationSets/branch-generator-template.yaml
           
           git add -A 
-          git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - ${{ github.ref_name }}"
-          git push --set-upstream origin ${{ github.ref_name }}
+          git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
+          git push --set-upstream origin $branch_with_slashes

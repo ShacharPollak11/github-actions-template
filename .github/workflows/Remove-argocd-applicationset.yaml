@@ -48,6 +48,7 @@ jobs:
       
       - name: Delete namespace from kubernetes
         run: |
+          branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
           if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
           then 
             kubectl delete namespace ${{ github.event.repository.name }}-$branch_without_slashes; 
