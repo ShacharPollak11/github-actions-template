@@ -1,4 +1,4 @@
-name: install-airflow
+name: delete-airflow
 
 on:
   workflow_call:
@@ -10,9 +10,9 @@ env:
   aws_region:  us-east-1
 
 jobs:
-  install_airflow:
+  delete_airflow:
     runs-on: ubuntu-latest
-    name: install airflow
+    name: delete airflow
     steps:
       - name: List environment variables 
         run: env
@@ -33,20 +33,8 @@ jobs:
       - name: helm install airflow
         run: |
             aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-            helm repo add apache-airflow https://airflow.apache.org
             
             branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
             namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
-
-            cat << EOT >> ./helm/utility/airflow/values2.yaml
-            ingress:
-              web:
-                annotations: {
-                  external-dns.alpha.kubernetes.io/hostname: $namespace.dev.brightsourceenergy.net,
-                  nginx.ingress.kubernetes.io/force-ssl-redirect: 'true',
-                  nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-                  }
-                hosts: [$namespace.dev.brightsourceenergy.net]
-            EOT
-
-            helm upgrade --install airflow apache-airflow/airflow --namespace $namespace --create-namespace -f ./helm/utility/airflow/values.yaml -f ./helm/utility/airflow/values2.yaml
+            
+            helm uninstall airflow --namespace $namespace
