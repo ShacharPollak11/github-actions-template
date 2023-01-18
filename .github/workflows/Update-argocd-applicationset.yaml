@@ -72,10 +72,10 @@ jobs:
           done
 
           # if namespace exists rollout all pods
-          if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
-          then 
-            kubectl rollout restart deploy -n ${{ github.event.repository.name }}-$branch_without_slashes; 
-          fi
+          # if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
+          # then 
+          #   kubectl rollout restart deploy -n ${{ github.event.repository.name }}-$branch_without_slashes; 
+          # fi
 
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
           kubectl apply -f ./applicationSets/branch-generator-template.yaml
