@@ -71,9 +71,15 @@ jobs:
             sed -i "s,tag:.*,tag:\ $branch_without_slashes-$short_sha," $values_file_path
           done
 
+          # if namespace exists rollout all pods
+          if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
+          then 
+            kubectl rollout restart deploy -n ${{ github.event.repository.name }}-$branch_without_slashes; 
+          fi
+
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
           kubectl apply -f ./applicationSets/branch-generator-template.yaml
-          
+
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
           git push --set-upstream origin $branch_with_slashes
