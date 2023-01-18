@@ -38,7 +38,7 @@ jobs:
             branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
             namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
 
-            cat << EOT >> ./helm/utility/airflow/values2.yaml
+            cat << EOT >> ./helm/utility/airflow/generic_values.yaml
             ingress:
               web:
                 annotations: {
@@ -49,4 +49,4 @@ jobs:
                 hosts: [$namespace.dev.brightsourceenergy.net]
             EOT
 
-            helm upgrade --install airflow apache-airflow/airflow --namespace $namespace --create-namespace -f ./helm/utility/airflow/values.yaml -f ./helm/utility/airflow/values2.yaml
+            helm upgrade --install airflow apache-airflow/airflow --namespace $namespace --create-namespace -f ./helm/utility/airflow/values.yaml -f ./helm/utility/airflow/generic_values.yaml
