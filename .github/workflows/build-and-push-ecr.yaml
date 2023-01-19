@@ -91,6 +91,6 @@ jobs:
         if: ${{ github.event.pull_request.merged == true }}
         uses: abronin/ecr-retag-action@v1.6.0
         with:
-          repository: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}
+          repository: ${{ inputs.service_name }}
           tag: ${{ github.head_ref }}
           new-tags: ${{ github.ref_name }}
