@@ -37,7 +37,7 @@ jobs:
       - name: Create and update branch in argocd repo
         run: |
           echo "replace all slashes in branch name"
-          if [ -z "$GITHUB_HEAD_REF" ] || [ ${{ "github.event.pull_request.merged" == "true" }} ] ; then
+          if [ -z "$GITHUB_HEAD_REF" ] || [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
             echo "We are NOT IN a pull request"
             branch_with_slashes=${{ github.ref_name }}
             branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
