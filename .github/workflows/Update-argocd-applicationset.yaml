@@ -32,8 +32,9 @@ jobs:
         with:
           repository: brightsource-il/argocd
           token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ref: dev
 
-      - name: create branch in argocd repo
+      - name: Create and update branch in argocd repo
         run: |
           echo "replace all slashes in branch name"
           if [ -z "$GITHUB_HEAD_REF" ]; then
@@ -68,14 +69,8 @@ jobs:
           IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
           for values_file_path in ${values_files_array[@]}; do
             echo "values_file_path: $values_file_path"
-            sed -i "s,tag:.*,tag:\ $branch_without_slashes-$short_sha," $values_file_path
+            sed -i "s,tag:.*,tag:\ $short_sha," $values_file_path
           done
-
-          # if namespace exists rollout all pods
-          # if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
-          # then 
-          #   kubectl rollout restart deploy -n ${{ github.event.repository.name }}-$branch_without_slashes; 
-          # fi
 
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
           kubectl apply -f ./applicationSets/branch-generator-template.yaml

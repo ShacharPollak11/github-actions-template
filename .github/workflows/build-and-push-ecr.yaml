@@ -57,7 +57,9 @@ jobs:
           ecr: true
           logout: true
       
+        #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
       - name: Docker build and push
+        if: ${{ github.event.pull_request.merged != true }}
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
             echo "short_sha: $short_sha"
@@ -75,17 +77,20 @@ jobs:
             echo "branch_without_slashes: $branch_without_slashes"
             echo "branch_with_slashes: $branch_with_slashes"
 
-            if [ "${{ github.ref_name }}" == "dev" ]; then
-              echo "We are in dev branch"
-              image_tag=dev
-            else
-              image_tag=$branch_without_slashes-$short_sha
-            fi
             echo "image_tag: $image_tag"
             echo "Target: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$image_tag"
 
             docker buildx build \
             -o type=registry \
-            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$image_tag" \
+            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
+            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
             -f ${{ inputs.dockerfile_path }} \
             ${{ inputs.context_path }} \
+
+      - name: Retag ${{ inputs.service_name }} as dev
+        if: ${{ github.event.pull_request.merged == true }}
+        uses: abronin/ecr-retag-action@v1.6.0
+        with:
+          repository: test/image
+          tag: ${{ github.head_ref }}
+          new-tags: ${{ github.ref_name }}
