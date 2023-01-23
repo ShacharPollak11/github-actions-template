@@ -92,5 +92,5 @@ jobs:
         uses: abronin/ecr-retag-action@v1.6.0
         with:
           repository: ${{ inputs.service_name }}
-          tag: ${{ github.head_ref }}
+          tag: ${{ github.head_ref }} 
           new-tags: ${{ github.ref_name }}

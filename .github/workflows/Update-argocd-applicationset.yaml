@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "replace all slashes in branch name"
           if [ -z "$GITHUB_HEAD_REF" ] || [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
-            echo "We are NOT IN a pull request"
+            echo "We are NOT IN a pull request or we are in pull-request-merged"
             branch_with_slashes=${{ github.ref_name }}
             branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
           else
@@ -57,19 +57,8 @@ jobs:
 
           git checkout $branch_without_slashes 2>/dev/null || git checkout -b $branch_without_slashes
 
-          short_sha=$(git rev-parse --short "$GITHUB_SHA")
-          echo "short sha: $short_sha"
 
-          echo "update image tag in values files"
-          IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
-          for values_file_path in ${values_files_array[@]}; do
-            echo "values_file_path: $values_file_path"
-            sed -i "s,tag:.*,tag:\ $short_sha," $values_file_path
-          done
-          
-          if [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
-            echo "The trigger was merged of pr completed"
-          else
+          if [ "${{ github.event.pull_request.merged }}" != "true" ] ; then
             echo "updating and replace place holders in branch-generator-template.yaml"
             sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
             sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
@@ -77,6 +66,20 @@ jobs:
             aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
             kubectl apply -f ./applicationSets/branch-generator-template.yaml
           fi     
+          
+          echo "update image tag in values files"
+          IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
+          for values_file_path in ${values_files_array[@]}; do
+            if [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
+              service_name=$(dirname "$values_file_path" | awk -F '/' '{print $NF}')
+              short_sha=$(aws ecr list-images --repository-name $service_name | jq '.imageIds[] | select(.imageTag == "'$branch_without_slashes'") | .imageDigest' | xargs -I {} aws ecr describe-images --repository-name $service_name --image-ids imageDigest={} | jq '.imageDetails[].imageTags' | jq '.[]' | jq 'select(. != "'$branch_without_slashes'" and . != "${{ github.head_ref }}")')
+            else
+              short_sha=$(git rev-parse --short "$GITHUB_SHA")
+            fi
+            echo "values_file_path: $values_file_path"
+            echo "short sha: $short_sha"
+            sed -i "s,tag:.*,tag:\ $short_sha," $values_file_path
+          done
 
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
