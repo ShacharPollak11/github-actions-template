@@ -34,7 +34,7 @@ jobs:
         run: |
           if git rev-parse --verify --quiet origin/${{ github.event.ref }}; 
           then
-            git push origin --delete ${{ github.event.repository.name }}_${{ github.event.ref }}; 
+            git push origin --delete ${{ github.event.repository.name }}-${{ github.event.ref }}; 
           fi
       
       - name: Delete applicationset from argocd namespace
