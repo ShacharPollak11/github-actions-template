@@ -60,20 +60,23 @@ jobs:
           short_sha=$(git rev-parse --short "$GITHUB_SHA")
           echo "short sha: $short_sha"
 
-          echo "updating and replace place holders in branch-generator-template.yaml"
-          sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
-          sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
-          sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
-
           echo "update image tag in values files"
           IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
           for values_file_path in ${values_files_array[@]}; do
             echo "values_file_path: $values_file_path"
             sed -i "s,tag:.*,tag:\ $short_sha," $values_file_path
           done
-
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          kubectl apply -f ./applicationSets/branch-generator-template.yaml
+          
+          if [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
+            echo "The trigger was merged of pr completed"
+          else
+            echo "updating and replace place holders in branch-generator-template.yaml"
+            sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
+            sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
+            sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
+            aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+            kubectl apply -f ./applicationSets/branch-generator-template.yaml
+          fi     
 
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
