@@ -51,16 +51,18 @@ jobs:
 
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
+          
+          # for debugging:
           git branch -a
           ls
           pwd
 
-          git checkout $branch_without_slashes 2>/dev/null || git checkout -b $branch_without_slashes
+          # The left side check if branch exists, and if not using the right side and create the branch
+          git checkout ${{ github.event.repository.name }}_$branch_without_slashes 2>/dev/null || git checkout -b ${{ github.event.repository.name }}_$branch_without_slashes
 
-
-          if [ "${{ github.event.pull_request.merged }}" != "true" ] ; then
+          if [ "${{ github.event.pull_request.merged }}" != "true" ]; then
             echo "updating and replace place holders in branch-generator-template.yaml"
-            sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
+            sed -i "s,{branch},${{ github.event.repository.name }}_$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
             sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
             sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
             aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
@@ -68,8 +70,10 @@ jobs:
           fi     
           
           echo "update image tag in values files"
+          # IFS split the string to the array at any ';'
           IFS=';' read -ra values_files_array <<< "${{ inputs.values_files_paths }}"
           for values_file_path in ${values_files_array[@]}; do
+            # If we are in merged we want to take the shortsha from the ecr, else we want to take shortsha of the commit
             if [ "${{ github.event.pull_request.merged }}" == "true"  ] ; then
               service_name=$(dirname "$values_file_path" | awk -F '/' '{print $NF}')
               short_sha=$(aws ecr list-images --repository-name $service_name | jq '.imageIds[] | select(.imageTag == "'$branch_without_slashes'") | .imageDigest' | xargs -I {} aws ecr describe-images --repository-name $service_name --image-ids imageDigest={} | jq '.imageDetails[].imageTags' | jq '.[]' | jq 'select(. != "'$branch_without_slashes'" and . != "${{ github.head_ref }}")')
@@ -83,4 +87,4 @@ jobs:
 
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
-          git push --set-upstream origin $branch_with_slashes
+          git push --set-upstream origin ${{ github.event.repository.name }}_$branch_without_slashes
