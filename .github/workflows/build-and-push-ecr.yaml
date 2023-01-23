@@ -18,17 +18,12 @@ on:
       ecr_registry:
         type: string
         default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
-      enable-ecr:
-        required: false
-        type: boolean
-        default: true
 
 permissions:
   contents: read
 
 jobs:
   build-push-ecr:
-    if: ${{ inputs.enable-ecr }}
     runs-on: ubuntu-latest
     name: Service build and push to AWS ECR
     steps:
@@ -57,8 +52,8 @@ jobs:
           ecr: true
           logout: true
       
-        #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
       - name: Docker build and push
+        #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
         if: ${{ github.event.pull_request.merged != true }}
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
@@ -76,9 +71,6 @@ jobs:
             fi
             echo "branch_without_slashes: $branch_without_slashes"
             echo "branch_with_slashes: $branch_with_slashes"
-
-            echo "image_tag: $image_tag"
-            echo "Target: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$image_tag"
 
             docker buildx build \
             -o type=registry \
