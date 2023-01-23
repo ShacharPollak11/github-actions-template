@@ -65,6 +65,8 @@ jobs:
 
           # The left side check if branch exists, and if not using the right side and create the branch
           git checkout $argocd_branch_name 2>/dev/null || git checkout -b $argocd_branch_name
+          
+          # TODO: if branch exists, rebase dev to this branch.
 
           if [ "${{ github.event.pull_request.merged }}" != "true" ]; then
             echo "updating and replace place holders in branch-generator-template.yaml"
