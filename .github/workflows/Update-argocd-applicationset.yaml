@@ -49,6 +49,12 @@ jobs:
           echo "branch_without_slashes: $branch_without_slashes"
           echo "branch_with_slashes: $branch_with_slashes"
 
+          if [ "${{ github.event.pull_request.merged }}" != "true"  ] ; then
+            argocd_branch_name=${{ github.event.repository.name }}-$branch_without_slashes
+          else
+            argocd_branch_name=$branch_without_slashes
+          fi
+
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
           
@@ -58,7 +64,7 @@ jobs:
           pwd
 
           # The left side check if branch exists, and if not using the right side and create the branch
-          git checkout ${{ github.event.repository.name }}-$branch_without_slashes 2>/dev/null || git checkout -b ${{ github.event.repository.name }}-$branch_without_slashes
+          git checkout $argocd_branch_name 2>/dev/null || git checkout -b $argocd_branch_name
 
           if [ "${{ github.event.pull_request.merged }}" != "true" ]; then
             echo "updating and replace place holders in branch-generator-template.yaml"
@@ -87,4 +93,4 @@ jobs:
 
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
-          git push --set-upstream origin ${{ github.event.repository.name }}-$branch_without_slashes
+          git push --set-upstream origin $argocd_branch_name
