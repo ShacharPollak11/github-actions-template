@@ -91,7 +91,7 @@ jobs:
           for image in $images
             do
             # Get the image manifest
-            manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids "[{\"imageDigest\":\"$image\"}]" --query "images[0].imageManifest" --output text)
+            manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids "[{\"imageDigest\": $image}]" --query "images[0].imageManifest" --output text)
             # Extract the image platform from the manifest
             platform=$(echo $manifest | jq -r '.config.Labels."org.label-schema.os"')
             # Retag the image
