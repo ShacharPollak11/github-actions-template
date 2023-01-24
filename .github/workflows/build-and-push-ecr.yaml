@@ -65,24 +65,22 @@ jobs:
 
       - name: Create Short Sha
         uses: benjlevesque/short-sha@v2.1
-          id: short-sha
-          with:
-            length: 6
-        - run: echo $SHA
-          env: 
-            SHA: ${{ steps.short-sha.outputs.sha }}
-        
+        id: short-sha
+        with:
+          length: 6
+      - run: echo $SHA
+        env:
+          SHA: ${{ steps.short-sha.outputs.sha }}
+
       - name: Docker build and push
         uses: docker/build-push-action@v3.2.0
         with:
           # context: ${{ inputs.context_path }}
           push: ${{ github.event_name == 'push' }} # Only push image to registry on "push" events.
-          tags:
-            ${{ inputs.service_name }}:${{ github.run_id }},
+          tags: ${{ inputs.service_name }}:${{ github.run_id }},
             ${{ inputs.service_name }}:${{ steps.branch_name.outputs.branch_name }},
-            ${{ inputs.service_name }}:$SHA 
+            ${{ inputs.service_name }}:$SHA
           file: ${{ inputs.dockerfile_path }}
-
 
       # - name: Docker build and push
       #   #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
