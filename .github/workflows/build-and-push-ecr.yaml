@@ -81,11 +81,9 @@ jobs:
 
       - name: Retag Untagged
         if: ${{ github.event.pull_request.merged != true }}
-        uses: abronin/ecr-retag-action@v1.6.0
-        with:
-          repository: ${{ inputs.service_name }}
-          tag: ""
-          new-tags: $short_sha
+        run: |
+          aws sts get-caller-identity
+          aws ecr describe-repositories
 
       - name: Retag ${{ inputs.service_name }} as dev
         if: ${{ github.event.pull_request.merged == true }}
