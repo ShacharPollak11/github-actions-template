@@ -85,7 +85,7 @@ jobs:
           aws sts get-caller-identity
 
           # Get a list of all untagged images in the ECR repository
-          images=$(aws ecr list-images --repository-name ${{ inputs.ecr_registry }}/${{ inputs.service_name }} --query "imageIds[?type(imageTag) == `null`].[imageDigest]")
+          images=$(aws ecr list-images --repository-name ${{ inputs.ecr_registry }}/${{ inputs.service_name }} --query "imageIds[?type(imageTag) == 'null'].[imageDigest]")
 
           # Loop through each image and retag it with the short SHA and image platform
           for image in $images
