@@ -83,10 +83,14 @@ jobs:
         if: ${{ github.event.pull_request.merged != true }}
         run: |
           aws sts get-caller-identity
+          echo images=$images
+          aws ecr describe-repositories --repository-name ${{ inputs.service_name }}
+
 
           # Get a list of all untagged images in the ECR repository
           images=$(aws ecr list-images --repository-name ${{ inputs.service_name }} --query "imageIds[?imageTag==null].[imageDigest]")
-
+          echo images2=$images
+          echo image=$image
           # Loop through each image and retag it with the short SHA and image platform
           for image in $images
             do
