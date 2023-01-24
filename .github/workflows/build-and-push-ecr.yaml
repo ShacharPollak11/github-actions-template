@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Service build and push to AWS ECR
     steps:
-      - name: List environment variables 
+      - name: List environment variables
         run: env
 
       - name: Checkout
@@ -51,38 +51,46 @@ jobs:
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           ecr: true
           logout: true
-      
+
       - name: Docker build and push
         #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
         if: ${{ github.event.pull_request.merged != true }}
         run: |
-            short_sha=$(git rev-parse --short "$GITHUB_SHA")
-            echo "short_sha: $short_sha"
+          short_sha=$(git rev-parse --short "$GITHUB_SHA")
+          echo "short_sha: $short_sha"
 
-            echo "replace all slashes in branch name"
-            if [ -z "$GITHUB_HEAD_REF" ]; then
-              echo "We are NOT IN a pull request"
-              branch_with_slashes=${{ github.ref_name }}
-              branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-            else
-              echo "We are IN a pull request"
-              branch_with_slashes=${{ github.head_ref }}
-              branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
-            fi
-            echo "branch_without_slashes: $branch_without_slashes"
-            echo "branch_with_slashes: $branch_with_slashes"
+          echo "replace all slashes in branch name"
+          if [ -z "$GITHUB_HEAD_REF" ]; then
+            echo "We are NOT IN a pull request"
+            branch_with_slashes=${{ github.ref_name }}
+            branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          else
+            echo "We are IN a pull request"
+            branch_with_slashes=${{ github.head_ref }}
+            branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+          fi
+          echo "branch_without_slashes: $branch_without_slashes"
+          echo "branch_with_slashes: $branch_with_slashes"
 
-            docker buildx build \
-            -o type=registry \
-            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
-            -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
-            -f ${{ inputs.dockerfile_path }} \
-            ${{ inputs.context_path }} \
+          docker buildx build \
+          -o type=registry \
+          -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
+          -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
+          -f ${{ inputs.dockerfile_path }} \
+          ${{ inputs.context_path }} \
+
+      - name: Retag Untagged
+        if: ${{ github.event.pull_request.merged != true }}
+        uses: abronin/ecr-retag-action@v1.6.0
+        with:
+          repository: ${{ inputs.service_name }}
+          tag: "<untagged>"
+          new-tags: $short_sha
 
       - name: Retag ${{ inputs.service_name }} as dev
         if: ${{ github.event.pull_request.merged == true }}
         uses: abronin/ecr-retag-action@v1.6.0
         with:
           repository: ${{ inputs.service_name }}
-          tag: ${{ github.head_ref }} 
+          tag: ${{ github.head_ref }}
           new-tags: ${{ github.ref_name }}
