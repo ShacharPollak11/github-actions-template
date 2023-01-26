@@ -15,22 +15,22 @@ jobs:
     name: ReSharper Report
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v2
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
-      - name: Restore dependencies
+          dotnet-version: [6.0.x,7.0.x]
+      - name: Restore Dependencies
         run: |
           dotnet nuget add source ${{ secrets.BSII_NUGET_URL }} -n ArtifactoryV2   -u ${{ secrets.BSII_NUGET_USER }} -p ${{ secrets.BSII_NUGET_PASSWORD }} --store-password-in-clear-text
           dotnet restore ${{ inputs.context_path }}
       - name: Inspect code
         uses: muno92/resharper_inspectcode@1.6.3 #see security of it - let's fork our own if we don't trust it
         with:
-          ignoreIssueType: "notice"
-          minimumSeverity: "warning"
+          minimumSeverity: "warning" # this should include: ignoreIssueType: "notice"
           solutionPath: ${{ inputs.solution_file }}
-          include: |
-            **.cs
-            **.cshtml
+          # include: | # let's start with resharper defautl and see if we want to be more specific
+            # **.cs
+            # **.cshtml
+        #ignoreIssueType: UnusedField.Compiler,UnusedMember.Global # we might want to add this in the future, maybe get it as an argument
