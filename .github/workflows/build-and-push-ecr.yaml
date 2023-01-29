@@ -79,27 +79,27 @@ jobs:
           -f ${{ inputs.dockerfile_path }} \
           ${{ inputs.context_path }} \
 
-      - name: Retag Untagged
-        if: ${{ github.event.pull_request.merged != true }}
-        run: |
-          aws sts get-caller-identity
+      # - name: Retag Untagged
+      #   if: ${{ github.event.pull_request.merged != true }}
+      #   run: |
+      #     aws sts get-caller-identity
 
-          # Get a list of all untagged images in the ECR repository
-          images=$(aws ecr list-images --repository-name ${{ inputs.service_name }} --query "imageIds[?imageTag==null].[imageDigest]")
+      #     # Get a list of all untagged images in the ECR repository
+      #     images=$(aws ecr list-images --repository-name ${{ inputs.service_name }} --query "imageIds[?imageTag==null].[imageDigest]")
 
-          # Loop through each image and retag it with the short SHA and image platform
-          for image in $images
-            do
-            # Get the image manifest
-            manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids imageDigest=$image --query "images[0].imageManifest" --output text)
+      #     # Loop through each image and retag it with the short SHA and image platform
+      #     for image in $images
+      #       do
+      #       # Get the image manifest
+      #       manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids imageDigest=$image --query "images[0].imageManifest" --output text)
 
-            # Extract the image platform from the manifest
-            platform=$(echo $manifest | jq -r '.config.Labels."org.label-schema.os"')
-            # Retag the image
-            aws ecr tag-image --repository-name ${{ inputs.service_name }} --image-digest $image --tags "short_sha=$short_sha,platform=$platform"
-            # Push the image to ECR
-            aws ecr push --repository-name ${{ inputs.service_name }} --image-digest $image
-          done
+      #       # Extract the image platform from the manifest
+      #       platform=$(echo $manifest | jq -r '.config.Labels."org.label-schema.os"')
+      #       # Retag the image
+      #       aws ecr tag-image --repository-name ${{ inputs.service_name }} --image-digest $image --tags "short_sha=$short_sha,platform=$platform"
+      #       # Push the image to ECR
+      #       aws ecr push --repository-name ${{ inputs.service_name }} --image-digest $image
+      #     done
 
       - name: Retag ${{ inputs.service_name }} as dev
         if: ${{ github.event.pull_request.merged == true }}
