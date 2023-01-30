@@ -106,7 +106,7 @@ jobs:
         uses: abronin/ecr-retag-action@v1.6.0
         with:
           repository: ${{ inputs.service_name }}
-          tag: "<untagged>"
+          tag: ""
           new-tags: $short_sha
 
       - name: Retag ${{ inputs.service_name }} as dev
