@@ -33,8 +33,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -52,10 +50,13 @@ jobs:
           ecr: true
           logout: true
 
-      - name: Docker build and push
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+      # - name: Docker build and push
         #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
-        if: ${{ github.event.pull_request.merged != true }}
-        run: |
+        with: 
+          if: ${{ github.event.pull_request.merged != true }}
+          run: |
           short_sha=$(git rev-parse --short "$GITHUB_SHA")
           echo "short_sha: $short_sha"
 
