@@ -15,7 +15,9 @@ on:
       aws_ci_region:
         type: string
         default: "us-east-1"
-      
+      aws_ci_account:
+        type: string
+        default: "479886561928"
       ecr_registry:
         type: string
         default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
@@ -74,8 +76,8 @@ jobs:
           # context: ${{ inputs.context_path }}
           push: ${{ github.event_name == 'push' }}  # Only push image to registry on "push" events.
           tags: 
-                479886561928.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},
-                479886561928.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}
+                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},
+                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}
           file: ${{ inputs.dockerfile_path }} 
 
 
