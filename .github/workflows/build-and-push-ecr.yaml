@@ -74,9 +74,9 @@ jobs:
 
           docker buildx build \
           -o type=registry \
+          -f ${{ inputs.dockerfile_path }} \
           -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
           -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
-          -f ${{ inputs.dockerfile_path }} \
           ${{ inputs.context_path }} \
 
       # - name: Retag Untagged
