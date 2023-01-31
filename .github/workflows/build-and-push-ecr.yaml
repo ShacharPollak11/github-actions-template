@@ -68,7 +68,7 @@ jobs:
         id: short_sha 
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
-            echo "short_sha: $short_sha"
+            echo "::set-output name=short_sha:: $short_sha"
             
       - name: Docker build and push
         uses: docker/build-push-action@v3.2.0
