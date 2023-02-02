@@ -43,7 +43,5 @@ jobs:
           # pip install -r requirements.txt
       - name: Test with pytest
         run: |
-          # pip install unittest
-          # python -m unittest discover 
-          pwd 
-          ls
+          python -m unittest
+          python -m unittest discover "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
