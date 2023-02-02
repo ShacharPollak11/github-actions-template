@@ -3,13 +3,18 @@ name: CI Python
 on:
   workflow_call:
     inputs:
-      unit-path:
-        required: false
-        type: string
       python-version:
         required: false
         type: string
         default: "3.9"
+      requirements-path:
+        required: false
+        type: string
+        default: "requirements.txt"
+      test-path:
+        required: false
+        type: string
+        default: "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
 
   workflow_dispatch:
     inputs:
@@ -24,5 +29,6 @@ jobs:
     uses: ./.github/workflows/python-unit-test.yaml
     secrets: inherit
     with:
-      unit-path: ${{ inputs.unit-path }}
       python-version: ${{ inputs.python-version }}
+      requirements-path: ${{ inputs.requirements }}
+      test-path: ${{ inputs. test-path }}
