@@ -3,10 +3,10 @@ name: Python Test
 on:
   workflow_call:
     inputs:
-      unit_path:
+      unit-path:
         required: false
         type: string
-      python_version:
+      python-version:
         required: false
         type: string
         default: "3.9"
@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ inputs.python_version }}
+      - name: Set up Python ${{ inputs.python-version }}
         uses: actions/setup-python@v4
         with:
-          python_version: ${{ inputs.python_version }}
+          python-version: ${{ inputs.python-version }}
       # You can test your matrix by printing the current Python version
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
