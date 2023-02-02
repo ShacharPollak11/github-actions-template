@@ -3,7 +3,7 @@ name: CI Python
 on:
   workflow_call:
     inputs:
-      unit-path:
+      unit_path:
         required: false
         type: string
 
