@@ -6,6 +6,10 @@ on:
       unit_path:
         required: false
         type: string
+      python_version:
+        required: false
+        type: string
+        default: "3.9"
 
   workflow_dispatch:
     inputs:
@@ -21,3 +25,4 @@ jobs:
     secrets: inherit
     with:
       unit_path: ${{ inputs.unit_path }}
+      python_version: ${{ inputs.python-version }}
