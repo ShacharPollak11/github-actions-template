@@ -1,0 +1,46 @@
+name: delete-airflow
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  aws_region:  us-east-1
+
+jobs:
+  delete_airflow:
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    name: delete airflow
+    steps:
+      - name: List environment variables 
+        run: env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+
+      - name: helm uninstall airflow
+        run: |
+            aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+            
+            branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
+            namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
+            
+            helm uninstall airflow --namespace $namespace
+
+            if kubectl get namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
+            then 
+              kubectl delete namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes; 
+            fi

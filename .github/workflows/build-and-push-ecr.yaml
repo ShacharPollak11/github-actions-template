@@ -1,0 +1,143 @@
+name: CI service
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile_path:
+        required: true
+        type: string
+      service_name:
+        required: true
+        type: string
+      context_path:
+        required: true
+        type: string
+      aws_ci_region:
+        type: string
+        default: "us-east-1"
+      aws_ci_account:
+        type: string
+        default: "479886561928"
+      ecr_registry:
+        type: string
+        default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
+
+permissions:
+  contents: read
+  
+env:
+  repository: dkr.ecr.${{ inputs.aws_ci_region }}.amazonaws.com/${{ inputs.service_name }}
+  
+jobs:
+  build-push-ecr:
+    runs-on: ubuntu-latest
+    name: Service build and push to AWS ECR
+    steps:
+      - name: List environment variables
+        run: env
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ inputs.aws_ci_region }}
+
+      - name: Login to ECR
+        uses: docker/login-action@v2.0.0
+        with:
+          registry: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          ecr: true
+          logout: true
+      - name: Replace branch name bad chars
+        id: branch_name
+        run: |
+          if [ ${{ github.event_name }} == "pull_request" ]; then
+            name=$( echo '${{ github.head_ref }}' | tr '/' '-' )
+            echo "::set-output name=branch_name::$name"
+          else
+            name=$( echo '${{ github.ref_name }}' | tr '/' '-' )
+            echo "::set-output name=branch_name::$name"
+          fi
+      - name: Calc Short SHA
+        id: short_sha 
+        run: |
+            short_sha=$(git rev-parse --short "$GITHUB_SHA")
+            echo "::set-output name=short_sha::$short_sha"
+            
+      - name: Docker build and push
+        uses: docker/build-push-action@v3.2.0
+        with:
+          context: ${{ inputs.context_path }}
+          push: true
+          tags: 
+                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},
+                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}
+          file: ${{ inputs.dockerfile_path }} 
+
+
+
+#      - name: Build and Push Docker Image
+#        uses: docker/build-push-action@v2
+ #       # - name: Docker build and push
+  #      #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
+   #     with:
+    #      if: ${{ github.event.pull_request.merged != true }}
+     #     run: |
+      #      short_sha=$(git rev-parse --short "$GITHUB_SHA")
+       #     echo "short_sha: $short_sha"
+#
+ #           echo "replace all slashes in branch name"
+  #          if [ -z "$GITHUB_HEAD_REF" ]; then
+   #           echo "We are NOT IN a pull request"
+     #         branch_with_slashes=${{ github.ref_name }}
+      #        branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+       #     else
+        #      echo "We are IN a pull request"
+         #     branch_with_slashes=${{ github.head_ref }}
+          #    branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+           # fi
+            #echo "branch_without_slashes: $branch_without_slashes"
+            #echo "branch_with_slashes: $branch_with_slashes"
+#
+ #           docker build \
+  #          -o type=registry \
+   #         -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
+    #        -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
+     #       -f ${{ inputs.dockerfile_path }} \
+            # ${{ inputs.context_path }} \
+
+        # - name: Retag Untagged
+        #   if: ${{ github.event.pull_request.merged != true }}
+        #   run: |
+        #     aws sts get-caller-identity
+
+        #     # Get a list of all untagged images in the ECR repository
+        #     images=$(aws ecr list-images --repository-name ${{ inputs.service_name }} --query "imageIds[?imageTag==null].[imageDigest]")
+
+        #     # Loop through each image and retag it with the short SHA and image platform
+        #     for image in $images
+        #       do
+        #       # Get the image manifest
+        #       manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids imageDigest=$image --query "images[0].imageManifest" --output text)
+
+        #       # Extract the image platform from the manifest
+        #       platform=$(echo $manifest | jq -r '.config.Labels."org.label-schema.os"')
+        #       # Retag the image
+        #       aws ecr tag-image --repository-name ${{ inputs.service_name }} --image-digest $image --tags "short_sha=$short_sha,platform=$platform"
+        #       # Push the image to ECR
+        #       aws ecr push --repository-name ${{ inputs.service_name }} --image-digest $image
+        #     done
+
+      - name: Retag ${{ inputs.service_name }} as dev
+        if: ${{ github.event.pull_request.merged == true }}
+        uses: abronin/ecr-retag-action@v1.6.0
+        with:
+          repository: ${{ inputs.service_name }}
+          tag: ${{ github.head_ref }}
+          new-tags: ${{ github.ref_name }}
