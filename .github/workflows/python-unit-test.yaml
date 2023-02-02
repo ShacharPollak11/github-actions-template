@@ -45,4 +45,4 @@ jobs:
         run: |
           python -m unittest
           cat "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
-          python -m unittest discover "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
+          python -m unittest  "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
