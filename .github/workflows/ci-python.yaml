@@ -11,6 +11,9 @@ on:
         required: false
         type: string
         default: "requirements.txt"
+      setup-config-path:
+        required: false
+        type: string
       test-path:
         required: false
         type: string
