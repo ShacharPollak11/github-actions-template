@@ -10,7 +10,6 @@ on:
       requirements-path:
         required: false
         type: string
-        default: "requirements.txt"
       setup-config-path:
         required: false
         type: string
@@ -25,5 +24,6 @@ jobs:
     secrets: inherit
     with:
       python-version: ${{ inputs.python-version }}
-      requirements-path: ${{ inputs.requirements }}
-      test-path: ${{ inputs. test-path }}
+      requirements-path: ${{ inputs.requirements-path }}
+      test-path: ${{ inputs.test-path }}
+      setup-config-path: ${{ inputs.setup-config-path }}
