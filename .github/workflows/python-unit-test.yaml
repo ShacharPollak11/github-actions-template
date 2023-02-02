@@ -6,6 +6,10 @@ on:
       unit-path:
         required: false
         type: string
+      python-version:
+        required: false
+        type: string
+        default: "3.9"
 
   workflow_dispatch:
     inputs:
@@ -26,3 +30,18 @@ jobs:
         with:
           python-path: "./Python/bsii_cloud/storage_tests/s3-wrapper_test.py"
           deps_list: "requirement"
+
+
+
+jobs:
+  build:
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ python-version }}
+      # You can test your matrix by printing the current Python version
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
