@@ -16,14 +16,6 @@ on:
         type: string
         default: "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
 
-  workflow_dispatch:
-    inputs:
-      test:
-        description: "test"
-        required: false
-        default: "test"
-        type: string
-
 jobs:
   test:
     uses: ./.github/workflows/python-unit-test.yaml
