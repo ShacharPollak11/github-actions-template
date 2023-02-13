@@ -16,7 +16,7 @@ on:
       enable-snyk:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-resharper:
         required: false
         type: boolean
