@@ -9,7 +9,9 @@ on:
       node_version:
         type: number
         default: 16
-
+      aws_ci_region:
+        type: string
+        default: "us-east-1"
 jobs:
   nx-ci:
     name: Client CI (NX)
@@ -22,19 +24,23 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      
       - uses: actions/setup-node@v3
         with:
           node-version:  ${{ inputs.node_version }}
           cache: 'npm'
           cache-dependency-path: ${{ inputs.context_path }}/package-lock.json
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
+
       - name: Login AWS CodeArtifact  
         run: aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1 --no-verify-ssl
+      
       - run: npm install
         working-directory: ${{ inputs.context_path }}
 
