@@ -36,7 +36,7 @@ on:
       enable-resharper:
         required: false
         type: boolean
-        default: false
+        default: true
       enable-ecr:
         required: false
         type: boolean
@@ -50,11 +50,11 @@ permissions:
   contents: read
 
 jobs:
-  # test:
-  #   uses: ./.github/workflows/dotnet-build-test.yaml
-  #   secrets:  inherit
-  #   with:
-  #     context_path: ${{ inputs.context_path }}
+  test:
+    uses: ./.github/workflows/dotnet-build-test.yaml
+    secrets:  inherit
+    with:
+      context_path: ${{ inputs.context_path }}
 
   sonar:
     if: ${{ inputs.enable-sonar }}
@@ -83,6 +83,7 @@ jobs:
     if: ${{ inputs.enable-ecr }}
     uses: ./.github/workflows/aws-ecr.yaml
     secrets:  inherit
+    needs: test
     with:
       context_path: ${{ inputs.context_path }}
       aws_ci_region: ${{ inputs.aws_ci_region }}
@@ -101,6 +102,7 @@ jobs:
     if: ${{ inputs.enable-jfrog }}
     uses: ./.github/workflows/jfrog-docker.yaml
     secrets:  inherit
+    needs: test
     with:
       context_path: ${{ inputs.context_path }}
       service_name: ${{ inputs.service_name }}
