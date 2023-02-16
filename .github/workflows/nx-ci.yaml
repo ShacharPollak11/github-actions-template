@@ -38,9 +38,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
-      - name: Login AWS CodeArtifact  
-        run: aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1 --no-verify-ssl
-      
       - run: npm install
         working-directory: ${{ inputs.context_path }}
 
