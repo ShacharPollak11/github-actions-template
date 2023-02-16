@@ -42,6 +42,7 @@ jobs:
         run: |
           aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
           npm set registry https://registry.npmjs.org/ 
+          npm set registry https://brightsource-479886561928.d.codeartifact.us-east-1.amazonaws.com/npm/artifactory/
         working-directory: ${{ inputs.context_path }}
       
       - run: npm install
