@@ -68,8 +68,10 @@ jobs:
           --lifecycle-policy-text '${{ steps.default_ecr_policy.outputs.policy }}'
 
       - name: Multi account permission policy set
-        working-directory: .github/templates
+        # working-directory: .github/templates
         run: |
+          pwd
+          ls
           aws ecr set-repository-policy \
             --repository-name ${{ inputs.service_name }} \
             --policy-text file://ecr-multi-account.json
