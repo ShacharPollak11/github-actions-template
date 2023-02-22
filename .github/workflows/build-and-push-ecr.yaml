@@ -51,22 +51,35 @@ jobs:
           aws ecr describe-repositories --repository-names ${{ inputs.service_name }} \
           || aws ecr create-repository --repository-name ${{ inputs.service_name }}
 
+      # - name: Download ecr policy 
+      #   id: default_ecr_policy
+      #   run: |
+      #     content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/main/.github/templates/ecr-policy.json`
+      #     # the following lines are only required for multi line json
+      #     content="${content//'%'/'%25'}"
+      #     content="${content//$'\n'/'%0A'}"
+      #     content="${content//$'\r'/'%0D'}"
+      #     # end of optional handling for multi line json
+      #     echo "policy=$content" >> $GITHUB_OUTPUT
+
       - name: Download ecr policy 
         id: default_ecr_policy
         run: |
           content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/feature/ecr-multi-account-policy/.github/templates/ecr-policy.json`
           # the following lines are only required for multi line json
-          #content="${content//'%'/'%25'}"
-          #content="${content//$'\n'/'%0A'}"
-          #content="${content//$'\r'/'%0D'}"
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
           echo "policy=$content" >> $GITHUB_OUTPUT
+
 
       - name: Lifecycle policy check/creation
         run: |
           # aws ecr get-lifecycle-policy --repository-name ${{ inputs.service_name }} || \
+          curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/feature/ecr-multi-account-policy/.github/templates/ecr-policy.json >> ecr-policy.json
           aws ecr put-lifecycle-policy --repository-name ${{ inputs.service_name }} \
-          --lifecycle-policy-text '${{ steps.default_ecr_policy.outputs.policy }}'
+          --lifecycle-policy-text file://ecr-policy.json #'${{ steps.default_ecr_policy.outputs.policy }}'
 
       - name: Multi account permission policy set
         run: |
