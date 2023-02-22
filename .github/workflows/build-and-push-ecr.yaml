@@ -59,7 +59,8 @@ jobs:
           content="${content//$'\n'/'%0A'}"
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
-          echo "::set-output name=policy::$content"
+          # echo "::set-output name=policy::$content"
+          echo "{policy}={$content}" >> $GITHUB_OUTPUT
 
       - name: Lifecycle policy check/creation
         run: |
