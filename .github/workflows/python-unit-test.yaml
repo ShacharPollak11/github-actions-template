@@ -47,7 +47,7 @@ jobs:
         run: |
           pwd 
           ls
-          cat '../storage/config.ini'
+          cat 'Python/bsii_cloud/bsii_cloud_storage/storage/config.ini'
           
           python -m pip install --upgrade pip
           pip install ${{ inputs.setup-config-path }}
