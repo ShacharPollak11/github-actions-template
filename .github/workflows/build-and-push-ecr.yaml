@@ -53,7 +53,7 @@ jobs:
 
       - id: default_ecr_policy
         run: |
-          content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/main/.github/templates/ecr-policy.json`
+          content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/feature/ecr-multi-account-policy/.github/templates/ecr-policy.json`
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
           content="${content//$'\n'/'%0A'}"
