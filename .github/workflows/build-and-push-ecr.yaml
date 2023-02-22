@@ -51,7 +51,8 @@ jobs:
           aws ecr describe-repositories --repository-names ${{ inputs.service_name }} \
           || aws ecr create-repository --repository-name ${{ inputs.service_name }}
 
-      - id: default_ecr_policy
+      - name: Download ecr policy 
+        id: default_ecr_policy
         run: |
           content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/feature/ecr-multi-account-policy/.github/templates/ecr-policy.json`
           # the following lines are only required for multi line json
