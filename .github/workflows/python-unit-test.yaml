@@ -17,6 +17,9 @@ on:
         required: false
         type: string
         default: "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
+        
+env:
+  aws_region:  us-east-2
 
 jobs:
   test:
