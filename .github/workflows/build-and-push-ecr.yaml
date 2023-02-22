@@ -64,8 +64,8 @@ jobs:
 
       - name: Lifecycle policy check/creation
         run: |
-          aws ecr get-lifecycle-policy --repository-name ${{ inputs.service_name }} \
-          || aws ecr put-lifecycle-policy --repository-name ${{ inputs.service_name }} \
+          # aws ecr get-lifecycle-policy --repository-name ${{ inputs.service_name }} || \
+          aws ecr put-lifecycle-policy --repository-name ${{ inputs.service_name }} \
           --lifecycle-policy-text '${{ steps.default_ecr_policy.outputs.policy }}'
 
       - name: Multi account permission policy set
