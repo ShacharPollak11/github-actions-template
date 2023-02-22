@@ -78,8 +78,8 @@ jobs:
           # end of optional handling for multi line json
           aws ecr set-repository-policy \
             --repository-name ${{ inputs.service_name }} \
-            --policy-text $content
-
+            --policy-text "$content"
+            
       - name: Login to ECR
         uses: docker/login-action@v2.0.0
         with:
