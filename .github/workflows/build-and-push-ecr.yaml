@@ -96,7 +96,7 @@ jobs:
           if [ ${{ github.event_name }} == "pull_request" ]; then
             name=$( echo '${{ github.head_ref }}' | tr '/' '-' )
             # echo "::set-output name=branch_name::$name"
-            echo "name=$name" >> $GITHUB_OUTPUT
+            echo "branch_name=$name" >> $GITHUB_OUTPUT
           else
             name=$( echo '${{ github.ref_name }}' | tr '/' '-' )
             # echo "::set-output name=branch_name::$name"
