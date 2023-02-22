@@ -59,7 +59,6 @@ jobs:
           content="${content//$'\n'/'%0A'}"
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
-          # echo "::set-output name=policy::$content"
           echo "policy=$content" >> $GITHUB_OUTPUT
 
       - name: Lifecycle policy check/creation
@@ -69,7 +68,6 @@ jobs:
           --lifecycle-policy-text '${{ steps.default_ecr_policy.outputs.policy }}'
 
       - name: Multi account permission policy set
-        # working-directory: .github/templates
         run: |
           content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/feature/ecr-multi-account-policy/.github/templates/ecr-multi-account.json`
           # the following lines are only required for multi line json
@@ -95,11 +93,9 @@ jobs:
         run: |
           if [ ${{ github.event_name }} == "pull_request" ]; then
             name=$( echo '${{ github.head_ref }}' | tr '/' '-' )
-            # echo "::set-output name=branch_name::$name"
             echo "branch_name=$name" >> $GITHUB_OUTPUT
           else
             name=$( echo '${{ github.ref_name }}' | tr '/' '-' )
-            # echo "::set-output name=branch_name::$name"
             echo "branch_name=$name" >> $GITHUB_OUTPUT
           fi
 
@@ -107,7 +103,6 @@ jobs:
         id: short_sha 
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
-            # echo "::set-output name=short_sha::$short_sha"
             echo "short_sha=$short_sha" >> $GITHUB_OUTPUT
             
       - name: Docker build and push
