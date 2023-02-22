@@ -38,6 +38,8 @@ jobs:
             branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
             namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
             
+            helm ls -a
+            
             helm uninstall airflow --namespace $namespace
 
             if kubectl get namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
