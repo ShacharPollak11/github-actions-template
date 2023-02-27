@@ -39,6 +39,8 @@ jobs:
       - name: Get service names
         id: service_names
         run: |
+           pwd
+           ls
            readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
            echo "service_names<<EOF" >> GITHUB_ENV
            echo $service_names >> GITHUB_ENV
@@ -61,6 +63,8 @@ jobs:
       
       - name: update service to pushed image tag
         run: |
+          pwd
+          ls
           for service in "${service_names[@]}"; do
           # jq -r '.service_name' <<< "$service"
           sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," "helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml"
