@@ -50,7 +50,7 @@ jobs:
           # content="${content//$'\n'/'%0A'}"
           # content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
-          echo "services=$content" >> $GITHUB_OUTPUT
+          echo "services<<EOF $content EOF" >> $GITHUB_OUTPUT
           echo $content
     outputs:
       services: ${{ steps.services.outputs.services }}
