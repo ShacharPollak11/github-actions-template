@@ -36,7 +36,7 @@ on:
       
 
 jobs:
-  read_json:
+  read-json:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,16 +51,18 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
           echo "services=$content" >> $GITHUB_OUTPUT
+          echo $services
     outputs:
       services: ${{ steps.services.outputs.services }}
+
   ci-service:
-    needs: read_json
+    needs: read-json
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        array:  ${{ fromJson(needs.read_json.outputs.services) }}
+        array:  ${{ fromJson(needs.read-json.outputs.services) }}
     uses: ./.github/workflows/ci-service.yaml #@feature/push-to-main-deploy-dev
     secrets: inherit
     name: CI for ${{ matrix.array.service_name }} 
