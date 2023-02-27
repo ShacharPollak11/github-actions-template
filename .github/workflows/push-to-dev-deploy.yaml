@@ -68,7 +68,7 @@ jobs:
         run: |
           cat ../.github/services.json | jq -r '.[].service_name'  | while read service_name ; do
             echo "replacing values for service: ${service_name}"
-            sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/${service_name}/values.yaml
+            sed -i "s,tag:.*,tag:\ '${{ github.run_id }}'," helm/services/${service_name}/values.yaml
             cat helm/services/${service_name}/values.yaml
           done
 
