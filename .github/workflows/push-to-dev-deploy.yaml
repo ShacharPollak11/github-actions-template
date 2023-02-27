@@ -60,9 +60,14 @@ jobs:
           repository: brightsource-il/argocd
           ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
           ref: dev
+          path: argocd
       
       - name: update service to pushed image tag
         run: |
+          pwd
+          echo "\n"
+          ls
+          echo "\n"
           service_names='${{ steps.get_service_names.outputs.service_names_array }}'
           echo "service_names: ${service_names}"
 
