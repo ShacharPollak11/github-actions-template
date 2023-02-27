@@ -85,7 +85,7 @@ jobs:
       context_path: ${{ inputs.context_path }}
 
   build-push-ecr:
-    if: ( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( inputs.enable-test && inputs.enable-ecr)
+    if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( inputs.enable-test && inputs.enable-ecr ))
     uses: ./.github/workflows/build-and-push-ecr.yaml
     secrets:  inherit
     needs: test
