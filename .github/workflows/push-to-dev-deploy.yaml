@@ -66,7 +66,7 @@ jobs:
           pwd
           ls
           for service in "${service_names[@]}"; do
-          # jq -r '.service_name' <<< "$service"
+          echo "replacing values for service: $(jq -r '.service_name' <<< "$service)"
           sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," "helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml"
           cat helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
           done
