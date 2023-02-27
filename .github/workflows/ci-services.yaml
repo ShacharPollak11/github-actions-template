@@ -13,6 +13,10 @@ on:
         default: "[]"
         required: true
         type: string
+      enable-test:
+        required: false
+        type: boolean
+        default: true        
       enable-snyk:
         required: false
         type: boolean
