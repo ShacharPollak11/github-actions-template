@@ -42,7 +42,7 @@ jobs:
            pwd
            ls
            readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
-           echo "service_names<<EOF" >> GITHUB_ENV
+           echo "service_names_array<<EOF" >> GITHUB_ENV
            echo $service_names >> GITHUB_ENV
            echo "EOF" >> GITHUB_ENV
 
@@ -63,9 +63,10 @@ jobs:
       
       - name: update service to pushed image tag
         run: |
+          echo $service_names_array
           pwd
           ls
-          for service in "${service_names[@]}"; do
+          for service in "${service_names_array[@]}"; do
           echo "replacing values for service: $(jq -r '.service_name' <<< '$service')"
           sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
           cat helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
