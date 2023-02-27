@@ -30,30 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Service build and push to AWS ECR
     steps:
-      # - name: setup git config
-      #   run: git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
-
       - name: Checkout service repo
         uses: actions/checkout@v3
-
-      # - name: Get service names
-      #   id: get_service_names
-      #   run: |
-      #      readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
-      #      echo "service_names_array=${service_names[@]}" >> $GITHUB_OUTPUT
-      #      echo $service_names
-
-          #  echo "service_names_array<<EOF" >> GITHUB_ENV
-          #  echo $service_names >> GITHUB_ENV
-          #  echo "EOF" >> GITHUB_ENV
-
-      # - run: |
-      #     readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
-      #     echo $service_names
-
-      #     for service in "${service_names[@]}"; do
-      #     jq -r '.service_name' <<< "$service"
-      #     done
 
       - name: Checkout argocd repo
         uses: actions/checkout@v3
@@ -79,25 +57,3 @@ jobs:
           git add .
           git commit -m "pushed from: ${{ github.event.repository.name }} at: $(TZ="Israel" date --rfc-3339=seconds)"
           git push
-
-
-
-        # pwd
-        # echo "\n"
-        # ls
-        # echo "\n"
-        # service_names='${{ steps.get_service_names.outputs.service_names_array }}'
-        # echo "service_names: ${service_names}"
-
-        # #for service in "${service_names[@]}"; do
-        # for service in "${ {{ steps.get_service_names.outputs.service_names_array }}[@] }"; do
-        # echo "echoing 'service': $service"
-        # echo "replacing values for service: $(jq -r '.service_name' <<< '$service')"
-        # sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
-        # cat helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
-        # done
-
-
-
-#TZ="Israel" date --rfc-3339=seconds
-          
