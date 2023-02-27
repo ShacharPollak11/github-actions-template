@@ -1,0 +1,49 @@
+name: Deploy dev on push to main
+
+on:
+workflow_dispatch:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      ci_run_id:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      ci_run_id:
+        required: true
+        type: string
+        
+
+env:
+  service_values_path: "helm/services/${{ inputs.service_name }}/values.yaml"
+
+jobs:
+  update-argo-repo:
+    runs-on: ubuntu-latest
+    name: Service build and push to AWS ECR
+    steps:
+      # - name: setup git config
+      #   run: git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
+          ref: dev
+      
+      - name: update service to pushed image tag
+        run: sed -i "s,tag:.*,tag:\ ${{ inputs.ci_run_id }}," ${{ env.service_values_path }}
+
+
+
+#TZ="Israel" date --rfc-3339=seconds
+          
