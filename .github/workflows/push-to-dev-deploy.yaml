@@ -1,0 +1,73 @@
+name: Deploy service on push to dev
+
+on:
+# workflow_dispatch:
+#     inputs:
+#       service_name:
+#         required: true
+#         type: string
+#       ci_run_id:
+#         required: true
+#         type: string
+#       image_tag:
+#         required: true
+#         type: string
+  workflow_call:
+    # inputs:
+    #   service_name:
+    #     required: true
+    #     type: string
+    #   ci_run_id:
+    #     required: false
+    #     type: string
+        
+
+env:
+  service_values_path: "helm/services/${{ inputs.service_name }}/values.yaml"
+
+jobs:
+  update-argo-repo:
+    runs-on: ubuntu-latest
+    name: Service build and push to AWS ECR
+    steps:
+      # - name: setup git config
+      #   run: git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+
+      - name: Checkout service repo
+        uses: actions/checkout@v3
+
+      - name: Get service names
+        id: service_names
+        run: |
+           readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
+           echo "service_names<<EOF" >> GITHUB_ENV
+           echo $service_names >> GITHUB_ENV
+           echo "EOF" >> GITHUB_ENV
+
+      # - run: |
+      #     readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
+      #     echo $service_names
+
+      #     for service in "${service_names[@]}"; do
+      #     jq -r '.service_name' <<< "$service"
+      #     done
+
+      - name: Checkout argocd repo
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
+          ref: dev
+      
+      - name: update service to pushed image tag
+        run: |
+          for service in "${service_names[@]}"; do
+          # jq -r '.service_name' <<< "$service"
+          sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," "helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml"
+          cat helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
+          done
+
+
+
+#TZ="Israel" date --rfc-3339=seconds
+          
