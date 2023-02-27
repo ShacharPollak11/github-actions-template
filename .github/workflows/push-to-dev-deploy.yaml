@@ -67,10 +67,17 @@ jobs:
         working-directory: argocd
         run: |
           cat ../.github/services.json | jq -r '.[].service_name'  | while read service_name ; do
-          echo "replacing values for service: ${service_name}"
-          sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/${service_name}/values.yaml
-          cat helm/services/${service_name}/values.yaml
+            echo "replacing values for service: ${service_name}"
+            sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/${service_name}/values.yaml
+            cat helm/services/${service_name}/values.yaml
           done
+
+      - name: push changes to argocd repo
+        working-directory: argocd
+        run: |
+          git add .
+          git commit -m "pushed from: ${{ github.event.repository.name }} at: $(TZ="Israel" date --rfc-3339=seconds)"
+
 
 
         # pwd
