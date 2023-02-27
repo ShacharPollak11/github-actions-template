@@ -75,6 +75,7 @@ jobs:
       - name: push changes to argocd repo
         working-directory: argocd
         run: |
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git add .
           git commit -m "pushed from: ${{ github.event.repository.name }} at: $(TZ="Israel" date --rfc-3339=seconds)"
 
