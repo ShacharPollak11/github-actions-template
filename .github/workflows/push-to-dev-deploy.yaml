@@ -67,7 +67,7 @@ jobs:
           echo "service_names: ${service_names}"
 
           #for service in "${service_names[@]}"; do
-          for service in "${{ steps.get_service_names.outputs.service_names_array[@] }}"; do
+          for service in "${ {{ steps.get_service_names.outputs.service_names_array }}[@] }"; do
           echo "echoing 'service': $service"
           echo "replacing values for service: $(jq -r '.service_name' <<< '$service')"
           sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
