@@ -37,11 +37,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get service names
-        id: service_names
+        id: get_service_names
         run: |
            pwd
            ls
            readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
+          #  echo "service_names_array=$service_names" >> GITHUB_ENV
            echo "service_names_array<<EOF" >> GITHUB_ENV
            echo $service_names >> GITHUB_ENV
            echo "EOF" >> GITHUB_ENV
@@ -63,11 +64,11 @@ jobs:
       
       - name: update service to pushed image tag
         run: |
-          echo $service_names_array
+          service_names=${{ steps.get_service_names.outputs.service_names_array }}
           env
           pwd
           ls
-          for service in "${service_names_array[@]}"; do
+          for service in "${service_names[@]}"; do
           echo "replacing values for service: $(jq -r '.service_name' <<< '$service')"
           sed -i "s,tag:.*,tag:\ ${{ github.run_id }}," helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
           cat helm/services/$(jq -r '.service_name' <<< "$service")/values.yaml
