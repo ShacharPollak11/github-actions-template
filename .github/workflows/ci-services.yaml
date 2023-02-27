@@ -69,7 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         array:  ${{ fromJson(needs.read-json.outputs.services) }}
-    uses: ./.github/workflows/ci-service.yaml #@feature/push-to-main-deploy-dev
+    uses: ./.github/workflows/ci-service.yaml
     secrets: inherit
     name: CI for ${{ matrix.array.service_name }} 
     with:
