@@ -25,6 +25,10 @@ on:
       aws_ci_account:
         type: string
         default: "479886561928"
+      enable-test:
+        required: false
+        type: boolean
+        default: true
       enable-snyk:
         required: false
         type: boolean
@@ -51,6 +55,7 @@ permissions:
 
 jobs:
   test:
+    if: ${{ inputs.enable-test }}
     uses: ./.github/workflows/dotnet-build-test.yaml
     secrets:  inherit
     with:
