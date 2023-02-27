@@ -77,7 +77,9 @@ jobs:
         solution_file: ${{ matrix.array.solution_file }}
         dockerfile_path: ${{ matrix.array.dockerfile_path }}
         service_name: ${{ matrix.array.service_name }}
+        enable-test: ${{inputs.test-snyk}}
         enable-snyk: ${{inputs.enable-snyk}}
+        enable-test: ${{inputs.test-sonar}}
         enable-ecr: ${{inputs.enable-ecr}}
         enable-resharper: ${{inputs.enable-resharper}}
         enable-jfrog: ${{inputs.enable-jfrog}}
