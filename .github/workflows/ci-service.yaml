@@ -81,7 +81,7 @@ jobs:
 
   build-push-ecr:
     if: ${{ inputs.enable-ecr }}
-    uses: ./.github/workflows/aws-ecr.yaml
+    uses: ./.github/workflows/build-and-push-ecr.yaml
     secrets:  inherit
     needs: test
     with:
@@ -91,12 +91,12 @@ jobs:
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
 
-  helm-publish:
-    uses: ./.github/workflows/aws-helm-publish.yaml
-    secrets:  inherit
-    needs: build-push-ecr
-    with:
-      aws_ci_region: ${{ inputs.aws_ci_region }}
+  # helm-publish:
+  #   uses: ./.github/workflows/aws-helm-publish.yaml
+  #   secrets:  inherit
+  #   needs: build-push-ecr
+  #   with:
+  #     aws_ci_region: ${{ inputs.aws_ci_region }}
 
   build-push-jfrog:
     if: ${{ inputs.enable-jfrog }}
