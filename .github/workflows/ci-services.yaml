@@ -46,9 +46,9 @@ jobs:
         run: |
           content=`cat ${{inputs.projects_args}}`
           # the following lines are only required for multi line json
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
+          # content="${content//'%'/'%25'}"
+          # content="${content//$'\n'/'%0A'}"
+          # content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
           echo "services=$content" >> $GITHUB_OUTPUT
           echo $content
