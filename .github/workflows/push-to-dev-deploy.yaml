@@ -64,6 +64,7 @@ jobs:
       - name: update service to pushed image tag
         run: |
           echo $service_names_array
+          env
           pwd
           ls
           for service in "${service_names_array[@]}"; do
