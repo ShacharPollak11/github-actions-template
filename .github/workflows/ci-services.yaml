@@ -17,6 +17,10 @@ on:
         required: false
         type: boolean
         default: false
+      enable-sonar: 
+        required: false
+        type: boolean
+        default: true
       enable-resharper:
         required: false
         type: boolean
@@ -29,6 +33,7 @@ on:
         required: false
         type: boolean
         default: false
+      
 
 jobs:
   read_json:
@@ -45,7 +50,7 @@ jobs:
           content="${content//$'\n'/'%0A'}"
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
-          echo "::set-output name=services::$content"
+          echo "services=$content" >> $GITHUB_OUTPUT
     outputs:
       services: ${{ steps.services.outputs.services }}
   ci-service:
@@ -56,7 +61,7 @@ jobs:
       fail-fast: false
       matrix:
         array:  ${{ fromJson(needs.read_json.outputs.services) }}
-    uses: ./.github/workflows/ci-service.yaml
+    uses: ./.github/workflows/ci-service.yaml@feature/push-to-main-deploy-dev
     secrets: inherit
     name: CI for ${{ matrix.array.service_name }} 
     with:
