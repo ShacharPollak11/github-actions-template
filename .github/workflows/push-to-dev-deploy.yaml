@@ -42,7 +42,7 @@ jobs:
            pwd
            ls
            readarray -t service_names < <(jq -c -r '.[]' .github/services.json)
-          #  echo "service_names_array=$service_names" >> GITHUB_ENV
+           #  echo "service_names_array=$service_names" >> GITHUB_ENV
            echo "service_names_array<<EOF" >> GITHUB_ENV
            echo $service_names >> GITHUB_ENV
            echo "EOF" >> GITHUB_ENV
