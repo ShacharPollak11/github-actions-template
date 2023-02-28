@@ -25,6 +25,10 @@ on:
       aws_ci_account:
         type: string
         default: "479886561928"
+      enable-test:
+        required: false
+        type: boolean
+        default: true
       enable-snyk:
         required: false
         type: boolean
@@ -51,6 +55,7 @@ permissions:
 
 jobs:
   test:
+    if: ${{ inputs.enable-test }}
     uses: ./.github/workflows/dotnet-build-test.yaml
     secrets:  inherit
     with:
@@ -80,8 +85,8 @@ jobs:
       context_path: ${{ inputs.context_path }}
 
   build-push-ecr:
-    if: ${{ inputs.enable-ecr }}
-    uses: ./.github/workflows/aws-ecr.yaml
+    if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
+    uses: ./.github/workflows/build-and-push-ecr.yaml
     secrets:  inherit
     needs: test
     with:
@@ -90,13 +95,6 @@ jobs:
       aws_ci_account: ${{ inputs.aws_ci_account }}
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
-
-  helm-publish:
-    uses: ./.github/workflows/aws-helm-publish.yaml
-    secrets:  inherit
-    needs: build-push-ecr
-    with:
-      aws_ci_region: ${{ inputs.aws_ci_region }}
 
   build-push-jfrog:
     if: ${{ inputs.enable-jfrog }}

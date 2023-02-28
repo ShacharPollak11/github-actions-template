@@ -1,0 +1,40 @@
+name: Deploy service on push to dev
+
+on:
+  workflow_call:     
+
+env:
+  service_values_path: "helm/services/${{ inputs.service_name }}/values.yaml"
+
+jobs:
+  update-argo-repo:
+    runs-on: ubuntu-latest
+    name: Service build and push to AWS ECR
+    steps:
+      - name: Checkout service repo
+        uses: actions/checkout@v3
+
+      - name: Checkout argocd repo
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
+          ref: dev
+          path: argocd
+      
+      - name: update service to pushed image tag
+        working-directory: argocd
+        run: |
+          cat ../.github/services.json | jq -r '.[].service_name'  | while read service_name ; do
+            echo "replacing values for service: ${service_name}"
+            sed -i "s,tag:.*,tag:\ '${{ github.run_id }}'," helm/services/${service_name}/values.yaml
+            cat helm/services/${service_name}/values.yaml
+          done
+
+      - name: push changes to argocd repo
+        working-directory: argocd
+        run: |
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+          git add .
+          git commit -m "pushed from: ${{ github.event.repository.name }} at: $(TZ="Israel" date --rfc-3339=seconds)"
+          git push
