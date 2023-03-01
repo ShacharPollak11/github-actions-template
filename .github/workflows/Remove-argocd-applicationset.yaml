@@ -14,9 +14,6 @@ jobs:
     if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
-      - name: List environment variables 
-        run: env
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -25,17 +22,31 @@ jobs:
           aws-region: ${{ env.aws_region }}
 
       - name: Checkout argocd
+        id: checkout_argocd_repo
         uses: actions/checkout@v3
         with:
           repository: brightsource-il/argocd
-          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
 
       - name: Delete branch from argocd repo
         run: |
-          if git rev-parse --verify --quiet origin/${{ github.event.ref }}; 
-          then
-            git push origin --delete ${{ github.event.repository.name }}-${{ github.event.ref }}; 
+          git remote show origin | grep "Push  URL"  #Make sure we are in argocd repo
+          branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
+          git ls-remote --exit-code --heads origin ${{ github.event.repository.name }}-$branch_without_slashes
+          EXIT_CODE=$?
+
+          if [[ $EXIT_CODE == '0' ]]; then
+            echo "Deleting argocd branch '${{ github.event.repository.name }}-$branch_without_slashes'."
+            git push origin --delete ${{ github.event.repository.name }}-$branch_without_slashes;
+          elif [[ $EXIT_CODE == '2' ]]; then
+            echo "Git branch '${{ github.event.repository.name }}-$branch_without_slashes' does not exist in the remote repository."
           fi
+
+
+          # if git rev-parse --verify --quiet origin/${{ github.event.ref }}; 
+          # then
+          #   git push origin --delete ${{ github.event.repository.name }}-${{ github.event.ref }}; 
+          # fi
       
       - name: Delete applicationset from argocd namespace
         run: |
