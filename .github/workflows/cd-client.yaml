@@ -11,6 +11,10 @@ on:
       project:
         required: true
         type: string      
+      storybook:
+        required: false
+        default: false
+        type: boolean   
       dist-path:
         required: true
         type: string
@@ -58,6 +62,15 @@ jobs:
       - run: npm install
         working-directory: ${{ inputs.context_path }}
       - uses: mansagroup/nrwl-nx-action@main #change to latest after they fix nx clud support of --scan arg
+        if: ${{ inputs.storybook }}
+        with:
+          targets: build-storybook
+          nxCloud: true
+          workingDirectory: ${{ inputs.context_path }}
+          args: ${{ inputs.args }}
+          projects: ${{ inputs.project  }}  
+      - uses: mansagroup/nrwl-nx-action@main #change to latest after they fix nx clud support of --scan arg
+        if: ${{ inputs.storybook }} == false
         with:
           targets: build
           nxCloud: true
