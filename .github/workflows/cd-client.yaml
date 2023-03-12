@@ -76,13 +76,13 @@ jobs:
       # This step publishes the client artifact to an S3 bucket if triggered by "push" event, it checks if the bucket exists and creates it if not and attaches a lifecycle policy.
       # If triggered by the "dev" branch, the artkfact will be uploaded to "dev" folder, otherwise to "temp" folder.
       # - name: Publish client artifact to S3 bucket #TODO: add push to artifactory
-      - name: Create S3 Bucket
-        run: |
-              aws s3api get-bucket-versioning --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} 1>/dev/null || \
-              aws s3api create-bucket --acl private --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} && \
-              aws s3api put-bucket-versioning --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} --versioning-configuration Status=Enabled && \
-              aws s3api put-bucket-lifecycle-configuration --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} \
-              --lifecycle-configuration  file://./infra/.github/templates/client-lifecycle-policy.json
+      #- name: Create S3 Bucket
+       # run: |
+        #      aws s3api get-bucket-versioning --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} 1>/dev/null || \
+         #     aws s3api create-bucket --acl private --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} && \
+          #    aws s3api put-bucket-versioning --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} --versioning-configuration Status=Enabled && \
+           #   aws s3api put-bucket-lifecycle-configuration --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} \
+            #  --lifecycle-configuration  file://./infra/.github/templates/client-lifecycle-policy.json
               
       - uses:  jakejarvis/s3-sync-action@master
         name: Upload S3
