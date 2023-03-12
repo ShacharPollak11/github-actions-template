@@ -43,7 +43,7 @@ jobs:
         with:
           ssh-key: ${{ secrets.INFRA_SSH_PRIVATE_KEY }}
           repository: brightsource-il/cloud-infrastructure
-          ref: 'stasl-feature'
+          ref: 'main'
           path: infra         
       - uses: actions/setup-node@v3
         with:
