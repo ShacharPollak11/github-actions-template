@@ -20,6 +20,9 @@ on:
         type: string
       aws_ci_region:
         type: string
+        default: 'us-east-1'      
+      bucket_name:
+        type: string
         default: 'us-east-1'
       node_version:
         type: number
@@ -31,7 +34,8 @@ jobs:
     name: Client build and upload
     permissions:
       contents: read
-
+    env:
+      NODE_OPTIONS: --max-old-space-size=16384
     steps:  
       - name: Checkout repository
         uses: actions/checkout@v3
