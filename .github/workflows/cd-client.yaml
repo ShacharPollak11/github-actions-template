@@ -108,14 +108,14 @@ jobs:
       - uses:  jakejarvis/s3-sync-action@master
         if: ${{ inputs.bucket_name }} != ""
         name: Upload S3
-        id: S3 - specific bucket name
+        id: S3 specific bucket name
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           AWS_S3_BUCKET: ${{ inputs.bucket_name }}
           SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
           AWS_REGION: ${{ inputs.aws_ci_region}}
-          
+        
       - uses:  jakejarvis/s3-sync-action@master
         if: ${{ inputs.bucket_name }} == ""
         name: Upload S3
