@@ -50,6 +50,8 @@ jobs:
           node-version:  ${{ inputs.node_version }}
           cache: 'npm'
           cache-dependency-path: ${{ inputs.context_path }}/package-lock.json
+      - name: login codeartficat
+        run: aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
       - run: npm install
         working-directory: ${{ inputs.context_path }}
       - uses: mansagroup/nrwl-nx-action@main #change to latest after they fix nx clud support of --scan arg
