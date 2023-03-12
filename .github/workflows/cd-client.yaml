@@ -108,7 +108,6 @@ jobs:
       - uses:  jakejarvis/s3-sync-action@master
         if: ${{ inputs.bucket_name }} != ""
         name: Upload S3
-        id: S3 specific bucket name
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
@@ -118,8 +117,7 @@ jobs:
         
       - uses:  jakejarvis/s3-sync-action@master
         if: ${{ inputs.bucket_name }} == ""
-        name: Upload S3
-        id: S3
+        name: Upload S3 - specific bucket
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
