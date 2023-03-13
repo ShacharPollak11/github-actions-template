@@ -6,10 +6,7 @@ on:
       context_path:
         required: true
         type: string
-      enable-snyk:
-        required: false
-        type: boolean
-        default: true
+
 
 
 jobs:
@@ -18,12 +15,6 @@ jobs:
     secrets:  inherit
     with:
       context_path: ${{ inputs.context_path }}
-
-  snyk:
-    if: ${{ inputs.enable-snyk }}
-    uses: ./.github/workflows/snyk-sast-node.yaml
-    needs: nx-ci
-    secrets:  inherit
 
   sonar:
     if: ${{ inputs.enable-sonar }}
