@@ -83,16 +83,13 @@ jobs:
           args: ${{ inputs.args }}
           projects: ${{ inputs.project  }}
 
-      - name: Replace branch name bad chars
-        id: branch_name
+      - name: "Set bucket name "
         run: |
-             if [ ${{ github.event_name }} == "pull_request" ]; then
-               name=$( echo '${{ github.head_ref }}' | tr '/' '-' )
-               echo "::set-output name=branch_name::$name"
-             else
-               name=$( echo '${{ github.ref_name }}' | tr '/' '-' )
-               echo "::set-output name=branch_name::$name"
-             fi
+          if ${{ inputs.bucket_name }} != ''; then
+            echo "bucket_name=${{ inputs.bucket_name }}" >> $GITHUB_ENV
+          else
+            echo "bucket_name=s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}}" >> $GITHUB_ENV
+          fi
 
       # This step publishes the client artifact to an S3 bucket if triggered by "push" event, it checks if the bucket exists and creates it if not and attaches a lifecycle policy.
       # If triggered by the "dev" branch, the artkfact will be uploaded to "dev" folder, otherwise to "temp" folder.
@@ -105,15 +102,6 @@ jobs:
            #   aws s3api put-bucket-lifecycle-configuration --bucket s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}} \
             #  --lifecycle-configuration  file://./infra/.github/templates/client-lifecycle-policy.json
               
-      - uses:  jakejarvis/s3-sync-action@master
-        if: ${{ inputs.bucket_name }} != ''
-        name: Upload S3 - specific bucket
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          AWS_S3_BUCKET: ${{ inputs.bucket_name }}
-          SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
-          AWS_REGION: ${{ inputs.aws_ci_region}}
         
       - uses:  jakejarvis/s3-sync-action@master
         if: ${{ inputs.bucket_name }} == ''
@@ -121,6 +109,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          AWS_S3_BUCKET: s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}}
+          AWS_S3_BUCKET: env.bucket_name
           SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
           AWS_REGION: ${{ inputs.aws_ci_region}}
