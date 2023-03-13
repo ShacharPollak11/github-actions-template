@@ -17,14 +17,6 @@ on:
         required: false
         type: boolean
         default: true        
-      enable-snyk:
-        required: false
-        type: boolean
-        default: false
-      enable-sonar: 
-        required: false
-        type: boolean
-        default: true
       enable-resharper:
         required: false
         type: boolean
@@ -33,10 +25,6 @@ on:
         required: false
         type: boolean
         default: true
-      enable-jfrog:
-        required: false
-        type: boolean
-        default: false
       
 
 jobs:
@@ -73,8 +61,5 @@ jobs:
         dockerfile_path: ${{ matrix.array.dockerfile_path }}
         service_name: ${{ matrix.array.service_name }}
         enable-test: ${{ inputs.enable-test }}
-        enable-snyk: ${{ inputs.enable-snyk }}
-        enable-sonar: ${{ inputs.enable-sonar }}
         enable-ecr: ${{ inputs.enable-ecr }}
         enable-resharper: ${{ inputs.enable-resharper }}
-        enable-jfrog: ${{ inputs.enable-jfrog }}
