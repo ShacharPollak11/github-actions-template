@@ -109,6 +109,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          AWS_S3_BUCKET: env.bucket_name
+          AWS_S3_BUCKET: ${{ env.bucket_name }}
           SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
           AWS_REGION: ${{ inputs.aws_ci_region}}
