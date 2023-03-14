@@ -85,7 +85,7 @@ jobs:
 
       - name: "Set bucket name "
         run: |
-          if '${{ inputs.bucket_name }}' != ''; then
+          if [ '${{ inputs.bucket_name }}' != '' ]; then
             echo "bucket_name=${{ inputs.bucket_name }}" >> $GITHUB_ENV
           else
             echo "bucket_name=s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}}" >> $GITHUB_ENV
