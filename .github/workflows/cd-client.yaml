@@ -27,7 +27,7 @@ on:
         default: ''
       node_version:
         type: number
-        default: 16
+        default: 14
 jobs:
 
   build-and-push-to-s3:
