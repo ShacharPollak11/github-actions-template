@@ -28,6 +28,9 @@ on:
       node_version:
         type: number
         default: 14
+      yarn:
+        type: boolean
+        default: false
 jobs:
 
   build-and-push-to-s3:
@@ -56,12 +59,20 @@ jobs:
           ssh-key: ${{ secrets.INFRA_SSH_PRIVATE_KEY }}
           repository: brightsource-il/cloud-infrastructure
           ref: 'main'
-          path: infra         
+          path: infra        
+      
+      - name: "Set lock file "
+        run: |
+          if '${{ inputs.yarn }}'; then
+            echo "lock_file=yarn.lock.json" >> $GITHUB_ENV
+          else
+            echo "lock_file=package-lock.json" >> $GITHUB_ENV
+          fi
       - uses: actions/setup-node@v3
         with:
           node-version:  ${{ inputs.node_version }}
           cache: 'npm'
-          cache-dependency-path: ${{ inputs.context_path }}/package-lock.json
+          cache-dependency-path: ${{ inputs.context_path }}/${{ env.lock_file }}
       - name: login codeartficat
         run: aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
       - run: npm install
