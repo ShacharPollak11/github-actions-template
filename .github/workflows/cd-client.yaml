@@ -64,7 +64,7 @@ jobs:
       - name: "Set lock file "
         run: |
           if '${{ inputs.yarn }}'; then
-            echo "lock_file=yarn.lock.json" >> $GITHUB_ENV
+            echo "lock_file=yarn.lock" >> $GITHUB_ENV
           else
             echo "lock_file=package-lock.json" >> $GITHUB_ENV
           fi
