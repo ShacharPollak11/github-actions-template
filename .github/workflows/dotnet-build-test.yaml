@@ -22,9 +22,16 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
+      - name: Configure AWS Credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v1
+        with: 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ inputs.aws_ci_region }}
+  
       - name: Restore dependencies
         run: |
-          dotnet nuget add source ${{ secrets.BSII_NUGET_URL }} -n ArtifactoryV2   -u ${{ secrets.BSII_NUGET_USER }} -p ${{ secrets.BSII_NUGET_PASSWORD }} --store-password-in-clear-text
+          aws codeartifact login --tool dotnet --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
           dotnet restore ${{ inputs.context_path }}
       - name: Build
         run: dotnet build --no-restore ${{ inputs.context_path }}
