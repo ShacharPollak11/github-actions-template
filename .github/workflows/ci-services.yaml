@@ -29,6 +29,10 @@ on:
         required: false
         type: boolean
         default: true
+      enable-sonarqube:
+        required: false
+        type: boolean
+        default: true
       
 
 jobs:
@@ -68,3 +72,4 @@ jobs:
         enable-ecr: ${{ inputs.enable-ecr }}
         enable-resharper: ${{ inputs.enable-resharper }}
         enable-snyk: ${{ inputs.enable-snyk }}
+        enable-sonarqube: ${{ inputs.enable-sonarqube }}

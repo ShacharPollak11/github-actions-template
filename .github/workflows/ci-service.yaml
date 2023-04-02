@@ -37,6 +37,10 @@ on:
         required: false
         type: boolean
         default: true
+      enable-sonarqube:
+        required: false
+        type: boolean
+        default: true
       enable-ecr:
         required: false
         type: boolean
@@ -68,6 +72,13 @@ jobs:
     secrets:  inherit
     with:
       solution_file: ${{ inputs.solution_file }}
+      context_path: ${{ inputs.context_path }}
+
+  sonarqube:
+    if: ${{ inputs.enable-sonarqube }}
+    uses: ./.github/workflows/sonar-sast.yaml
+    secrets:  inherit
+    with:
       context_path: ${{ inputs.context_path }}
 
   build-push-ecr:
