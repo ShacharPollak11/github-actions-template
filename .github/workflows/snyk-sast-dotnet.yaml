@@ -13,6 +13,9 @@ on:
       context_path:
         required: true
         type: string
+      aws_ci_region:
+        type: string
+        default: 'us-east-1'   
 
 permissions:
   contents: read
@@ -30,8 +33,16 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
+      - name: Configure AWS Credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v1
+        with: 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ inputs.aws_ci_region }}
+
       - name: Restore dependencies
         run: |
+          aws codeartifact login --tool dotnet --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
           dotnet restore ${{ inputs.context_path }}
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/dotnet@master
