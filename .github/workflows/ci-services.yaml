@@ -25,6 +25,10 @@ on:
         required: false
         type: boolean
         default: true
+      enable-snyk:
+        required: false
+        type: boolean
+        default: true
       
 
 jobs:
@@ -63,3 +67,4 @@ jobs:
         enable-test: ${{ inputs.enable-test }}
         enable-ecr: ${{ inputs.enable-ecr }}
         enable-resharper: ${{ inputs.enable-resharper }}
+        enable-snyk: ${{ inputs.enable-snyk }}
