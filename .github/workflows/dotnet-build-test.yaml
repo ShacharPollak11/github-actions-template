@@ -6,6 +6,9 @@ on:
       context_path:
         required: true
         type: string
+      aws_ci_region:
+        type: string
+        default: 'us-east-1'
 permissions:
   contents: read
 
