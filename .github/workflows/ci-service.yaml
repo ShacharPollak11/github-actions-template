@@ -101,6 +101,6 @@ jobs:
     if: ${{ inputs.enable-polaris }}
     uses: ./.github/workflows/polaris-saas.yaml
     secrets: inherit
-    with:
-      solution_file: ${{ inputs.solution_file }}
-      context_path: ${{ inputs.context_path }}
+    # with:
+    #   solution_file: ${{ inputs.solution_file }}
+    #   context_path: ${{ inputs.context_path }}
