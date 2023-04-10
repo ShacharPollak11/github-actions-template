@@ -45,7 +45,10 @@ on:
         required: false
         type: boolean
         default: false
-
+      enable-polaris:
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -54,14 +57,14 @@ jobs:
   test:
     if: ${{ inputs.enable-test }}
     uses: ./.github/workflows/dotnet-build-test.yaml
-    secrets:  inherit
+    secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
 
   resharper:
     if: ${{ inputs.enable-resharper }}
     uses: ./.github/workflows/resharper.yaml
-    secrets:  inherit
+    secrets: inherit
     with:
       solution_file: ${{ inputs.solution_file }}
       context_path: ${{ inputs.context_path }}
@@ -69,7 +72,7 @@ jobs:
   snyk:
     if: ${{ inputs.enable-snyk }}
     uses: ./.github/workflows/snyk-sast-dotnet.yaml
-    secrets:  inherit
+    secrets: inherit
     with:
       solution_file: ${{ inputs.solution_file }}
       context_path: ${{ inputs.context_path }}
@@ -77,7 +80,7 @@ jobs:
   sonarqube:
     if: ${{ inputs.enable-sonarqube }}
     uses: ./.github/workflows/sonar-sast.yaml
-    secrets:  inherit
+    secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
       solution_file: ${{ inputs.solution_file }}
@@ -85,7 +88,7 @@ jobs:
   build-push-ecr:
     if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
     uses: ./.github/workflows/build-and-push-ecr.yaml
-    secrets:  inherit
+    secrets: inherit
     needs: test
     with:
       context_path: ${{ inputs.context_path }}
@@ -94,6 +97,10 @@ jobs:
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
 
-
-
-    
+  polaris-saas:
+    if: ${{ inputs.enable-polaris }}
+    uses: ./.github/workflows/polaris-saas.yaml
+    secrets: inherit
+    with:
+      solution_file: ${{ inputs.solution_file }}
+      context_path: ${{ inputs.context_path }}

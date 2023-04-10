@@ -16,7 +16,7 @@ on:
       enable-test:
         required: false
         type: boolean
-        default: true        
+        default: true
       enable-resharper:
         required: false
         type: boolean
@@ -33,7 +33,10 @@ on:
         required: false
         type: boolean
         default: true
-      
+      enable-polaris:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   read-json:
@@ -59,17 +62,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        array:  ${{ fromJson(needs.read-json.outputs.services) }}
+        array: ${{ fromJson(needs.read-json.outputs.services) }}
     uses: ./.github/workflows/ci-service.yaml
     secrets: inherit
-    name: CI for ${{ matrix.array.service_name }} 
+    name: CI for ${{ matrix.array.service_name }}
     with:
-        context_path: ${{ matrix.array.context_path }}
-        solution_file: ${{ matrix.array.solution_file }}
-        dockerfile_path: ${{ matrix.array.dockerfile_path }}
-        service_name: ${{ matrix.array.service_name }}
-        enable-test: ${{ inputs.enable-test }}
-        enable-ecr: ${{ inputs.enable-ecr }}
-        enable-resharper: ${{ inputs.enable-resharper }}
-        enable-snyk: ${{ inputs.enable-snyk }}
-        enable-sonarqube: ${{ inputs.enable-sonarqube }}
+      context_path: ${{ matrix.array.context_path }}
+      solution_file: ${{ matrix.array.solution_file }}
+      dockerfile_path: ${{ matrix.array.dockerfile_path }}
+      service_name: ${{ matrix.array.service_name }}
+      enable-test: ${{ inputs.enable-test }}
+      enable-ecr: ${{ inputs.enable-ecr }}
+      enable-resharper: ${{ inputs.enable-resharper }}
+      enable-snyk: ${{ inputs.enable-snyk }}
+      enable-sonarqube: ${{ inputs.enable-sonarqube }}
+      enable-polaris: ${{inputs.enable-polaris}}
