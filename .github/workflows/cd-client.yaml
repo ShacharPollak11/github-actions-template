@@ -122,4 +122,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           AWS_S3_BUCKET: ${{ env.bucket_name }}
           SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
+          DEST_DIR: ${{ inputs.project }}
           AWS_REGION: ${{ inputs.aws_ci_region}}
