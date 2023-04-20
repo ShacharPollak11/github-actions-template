@@ -57,7 +57,7 @@ jobs:
       - name: FIX BUG ANNA
         run: |
           echo pwd $(pwd)
-          echo ls -la $(ls -la)
+          echo ls $(ls)
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
