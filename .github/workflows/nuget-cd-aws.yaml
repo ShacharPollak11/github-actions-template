@@ -59,4 +59,4 @@ jobs:
           cd ${{ matrix.path  }}
           dotnet pack -c Release -o out -p:PackageVersion=${{ inputs.version }}
       - name: Push
-        run: dotnet nuget push ${{ matrix.path  }}/out/*.nupkg -s ${{ inputs.codeartifact_domain }}/${{ inputs.codeartifact_repository }}
+        run: dotnet nuget push ${{ matrix.path  }}/out/*.nupkg -s ${{ inputs.codeartifact_domain }}/${{ inputs.codeartifact_repository }} --tag "Tag-${{ inputs.tag }}"
