@@ -54,6 +54,10 @@ jobs:
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
+      - name: FIX BUG ANNA
+        run: |
+          echo pwd $(pwd)
+          echo ls -la $(ls -la)
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
