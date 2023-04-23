@@ -1,4 +1,4 @@
-name: Pack & Push a Dotnet Nuget 
+name: Pack & Push a Dotnet Nuget
 
 on:
   workflow_call:
@@ -19,17 +19,17 @@ on:
       codeartifact_domain:
         type: string
         default: "brightsource"
-      tag: 
+      tag:
         required: false
         type: string
 
 permissions:
   contents: read
-  
+
 jobs:
   pack-push:
     name: Push and Pack a Nuget
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
@@ -54,12 +54,9 @@ jobs:
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
-      - name: Clean + Build dotnet
-        run: |
-          dotnet build ${{ matrix.path }} --verbosity detailed
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
           dotnet pack -c Release -o out -p:PackageVersion=${{ inputs.version }}
-      # - name: Push
-      #   run: dotnet nuget push ${{ matrix.path  }}/out/*.nupkg -s ${{ inputs.codeartifact_domain }}/${{ inputs.codeartifact_repository }}
+      - name: Push
+        run: dotnet nuget push ${{ matrix.path  }}/out/*.nupkg -s ${{ inputs.codeartifact_domain }}/${{ inputs.codeartifact_repository }}

@@ -85,17 +85,17 @@ jobs:
       context_path: ${{ inputs.context_path }}
       solution_file: ${{ inputs.solution_file }}
 
-  # build-push-ecr:
-  #   # if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
-  #   uses: ./.github/workflows/build-and-push-ecr.yaml
-  #   secrets: inherit
-  #   # needs: test
-  #   with:
-  #     context_path: ${{ inputs.context_path }}
-  #     aws_ci_region: ${{ inputs.aws_ci_region }}
-  #     aws_ci_account: ${{ inputs.aws_ci_account }}
-  #     service_name: ${{ inputs.service_name }}
-  #     dockerfile_path: ${{ inputs.dockerfile_path }}
+  build-push-ecr:
+    if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
+    uses: ./.github/workflows/build-and-push-ecr.yaml
+    secrets: inherit
+    needs: test
+    with:
+      context_path: ${{ inputs.context_path }}
+      aws_ci_region: ${{ inputs.aws_ci_region }}
+      aws_ci_account: ${{ inputs.aws_ci_account }}
+      service_name: ${{ inputs.service_name }}
+      dockerfile_path: ${{ inputs.dockerfile_path }}
 
   polaris-saas:
     if: ${{ inputs.enable-polaris }}
