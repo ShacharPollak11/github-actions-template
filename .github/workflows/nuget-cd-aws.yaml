@@ -51,17 +51,13 @@ jobs:
           aws-region: ${{ inputs.aws_ci_region }}
       - name: Login to AWS CodeArtifact
         run: aws codeartifact login --tool dotnet  --repository ${{ inputs.codeartifact_repository }} --domain ${{ inputs.codeartifact_domain }}  --region us-east-1
-      - name: Clean dotnet
-        run: |
-          dotnet clean ${{ matrix.path }}
-          dotnet build ${{ matrix.path }}
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
-      - name: FIX BUG ANNA
+      - name: Clean + Build dotnet
         run: |
-          echo pwd $(pwd)
-          echo ls $(ls)
+          dotnet clean ${{ matrix.path }}
+          dotnet build ${{ matrix.path }}
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
