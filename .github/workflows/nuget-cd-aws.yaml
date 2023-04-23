@@ -51,6 +51,9 @@ jobs:
           aws-region: ${{ inputs.aws_ci_region }}
       - name: Login to AWS CodeArtifact
         run: aws codeartifact login --tool dotnet  --repository ${{ inputs.codeartifact_repository }} --domain ${{ inputs.codeartifact_domain }}  --region us-east-1
+      - name: Clean dotnet
+        run: |
+          dotnet clean
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
