@@ -54,6 +54,7 @@ jobs:
       - name: Clean dotnet
         run: |
           dotnet clean ${{ matrix.path }}
+          dotnet build ${{ matrix.path }}
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
