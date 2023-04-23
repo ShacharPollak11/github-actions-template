@@ -56,7 +56,7 @@ jobs:
           dotnet restore ${{ matrix.path }}
       - name: Clean + Build dotnet
         run: |
-          dotnet build ${{ matrix.path }}
+          dotnet build ${{ matrix.path }} --verbosity detailed
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
