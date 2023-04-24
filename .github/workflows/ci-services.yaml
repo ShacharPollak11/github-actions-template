@@ -20,7 +20,7 @@ on:
       enable-resharper:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-ecr:
         required: false
         type: boolean
@@ -28,7 +28,7 @@ on:
       enable-snyk:
         required: false
         type: boolean
-        default: true
+        default: false
       enable-sonarqube:
         required: false
         type: boolean
