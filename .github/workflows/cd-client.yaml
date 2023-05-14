@@ -11,6 +11,10 @@ on:
       project:
         required: true
         type: string      
+      dest-path:
+        required: false
+        type: string  
+        default: ''    
       storybook:
         required: false
         default: false
@@ -101,6 +105,13 @@ jobs:
           else
             echo "bucket_name=s3-client-dev-${{ inputs.aws_ci_region }}-${{ inputs.project}}" >> $GITHUB_ENV
           fi
+      - name: "Set dest dir "
+        run: |
+          if [ '${{ inputs.dest-path }}' != '' ]; then
+            echo "dest_path=${{ inputs.dest-path }}" >> $GITHUB_ENV
+          else
+            echo "dest_path=${{ inputs.project }}" >> $GITHUB_ENV
+          fi
 
       # This step publishes the client artifact to an S3 bucket if triggered by "push" event, it checks if the bucket exists and creates it if not and attaches a lifecycle policy.
       # If triggered by the "dev" branch, the artkfact will be uploaded to "dev" folder, otherwise to "temp" folder.
@@ -122,5 +133,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           AWS_S3_BUCKET: ${{ env.bucket_name }}
           SOURCE_DIR: ${{ inputs.context_path }}/${{ inputs.dist-path}}
-          DEST_DIR: ${{ inputs.project }}
+          DEST_DIR: ${{ env.dest_path }}
           AWS_REGION: ${{ inputs.aws_ci_region}}
