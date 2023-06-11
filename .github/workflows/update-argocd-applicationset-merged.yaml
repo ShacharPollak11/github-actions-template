@@ -24,6 +24,30 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_ARGOCD }}
           ref: dev
           fetch-depth: 0
+      
+      - name: Check if service folder exists in $ENVIRONMENT
+        id: check_service_folder
+        env:
+          SERVICES: ${{ inputs.services }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          for service in $SERVICES; do
+            if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
+              cp -R helm/dev/$service helm/$ENVIRONMENT/$service
+              echo "service_exists=false" >> "$GITHUB_OUTPUT"
+              rm -rf helm/$ENVIRONMENT/$service/values_dev.yaml
+              if [ $ENVIRONMENT == 'qa' ]; then
+                echo "values_$ENVIRONMENT.yaml exists"
+                rm -rf helm/$ENVIRONMENT/$service/values_staging.yaml
+                rm -rf helm/$ENVIRONMENT/$service/values_prod.yaml
+              else
+                exit 1
+              fi
+            else
+              echo "service_exists=true" >> "$GITHUB_OUTPUT"
+              echo "service folder exists in $ENVIRONMENT"
+            fi
+          done
 
       - name: Get tag number from dev values file
         id: tag
