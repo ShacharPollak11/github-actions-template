@@ -49,7 +49,7 @@ jobs:
             fi
           done
 
-      - name: Get tag number from dev values file
+      - name: Get image tag dev values file and override tag in $ENVIRONMENT
         id: tag
         env:
           SERVICES: ${{ inputs.services }}

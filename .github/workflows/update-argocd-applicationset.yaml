@@ -64,8 +64,6 @@ jobs:
           sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
           sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
           sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          kubectl apply -f ./applicationSets/branch-generator-template.yaml
 
           echo "update image tag in values files"
           services_array=$(echo "$SERVICES" | jq -r '.[]')
@@ -83,3 +81,7 @@ jobs:
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
           git push --set-upstream origin $argocd_branch_name
+          
+          echo "update argocd applicationset"
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          kubectl apply -f ./applicationSets/branch-generator-template.yaml
