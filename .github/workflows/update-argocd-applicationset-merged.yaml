@@ -1,0 +1,58 @@
+name: update-argocd-applicationset-merged
+
+on:
+  workflow_call:
+    inputs:
+      services:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-application-set-in-argocd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ref: dev
+          fetch-depth: 0
+
+      - name: Get tag number from dev values file
+        id: tag
+        env:
+          SERVICES: ${{ inputs.services }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "Get tag number from dev values file"
+          for service in $SERVICES; do
+            echo "service: $service"
+            dev_tag=$(grep "tag" "helm/dev/$service/values_$ENVIRONMENT.yaml" | awk -F ': ' '{print $2}' | sed 's/^"\(.*\)"$/\1/')
+            env_tag=$(grep "tag" "helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml" | awk -F ': ' '{print $2}' | sed 's/^"\(.*\)"$/\1/')
+            if [ "$dev_tag" == "$env_tag" ]; then
+              tag_equality=true
+              echo "Tag values in values_$ENVIRONMENT.yaml are equal to $dev_tag"
+            else
+              tag_equality=false
+              echo "Tag values in values_$ENVIRONMENT.yaml are not equal to $dev_tag"
+              sed -i "s,tag:.*,tag:\ $dev_tag," helm/$ENVIRONMENT/$service_name/values_$ENVIRONMENT.yaml
+              echo "Tag values in values_$ENVIRONMENT.yaml overridden to $dev_tag"
+            fi
+          done
+
+      - name: Commit and push changes to argocd repo
+        needs: tag
+        run: |
+          echo "Commit and push changes to argocd repo"
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+          git fetch
+          git add -A 
+          git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
+          git push --set-upstream origin dev

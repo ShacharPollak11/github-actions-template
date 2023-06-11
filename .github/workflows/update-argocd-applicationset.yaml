@@ -1,0 +1,85 @@
+name: update-argocd-applicationset
+
+on:
+  workflow_call:
+    inputs:
+      services:
+        required: true
+        type: string
+
+env:
+  aws_region: us-east-1
+
+permissions:
+  contents: read
+
+jobs:
+  create-branch-and-update-application-set-in-argocd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List environment variables
+        run: env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ref: dev
+          fetch-depth: 0
+
+      - name: Create and update branch in argocd repo
+        env:
+          SERVICES: ${{ inputs.services }}
+        run: |
+          echo "replace all slashes in branch name"
+          echo "A new pull request was opened/updated/closed - without a merge"
+          branch_with_slashes=${{ github.head_ref }}
+          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+          argocd_branch_name=${{ github.event.repository.name }}-$branch_without_slashes
+          
+          echo "branch_without_slashes: $branch_without_slashes"
+          echo "branch_with_slashes: $branch_with_slashes"
+          echo "argocd_branch_name: $argocd_branch_name"
+
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+          git fetch
+
+          # for debugging:
+          git branch -a
+          ls
+          pwd
+
+          # The left side check if branch exists, and if not using the right side and create the branch
+          git checkout $argocd_branch_name 2>/dev/null || git checkout -b $argocd_branch_name
+
+          echo "updating and replace place holders in branch-generator-template.yaml"
+          sed -i "s,{branch},$branch_without_slashes," ./applicationSets/branch-generator-template.yaml
+          sed -i "s,{repo},${{ github.event.repository.name }}," ./applicationSets/branch-generator-template.yaml
+          sed -i "s,environment:.*,environment:\ $branch_without_slashes," helm/umbrella/common.yaml
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          kubectl apply -f ./applicationSets/branch-generator-template.yaml
+
+          echo "update image tag in values files"
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
+          for service_name in ${services_array[@]}; do
+            short_sha=$(aws ecr list-images --repository-name $service_name | jq '.imageIds[] | select(.imageTag == "'$branch_without_slashes'") | .imageDigest' | xargs -I {} aws ecr describe-images --repository-name $service_name --image-ids imageDigest={} | jq '.imageDetails[].imageTags' | jq '.[]' | jq 'select(. != "'$branch_without_slashes'" and . != "${{ github.head_ref }}")')
+            echo "service_name: $service_name"
+            echo "short sha: $short_sha"
+            sed -i "s,tag:.*,tag:\ $short_sha," helm/dev/$service_name/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ $short_sha," helm/dev/$service_name/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ $short_sha," helm/dev/$service_name/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ $short_sha," helm/dev/$service_name/values_prod.yaml
+          done
+
+          git add -A 
+          git diff-index --quiet HEAD || git commit -m "Updated from ${{ github.event.repository.name }} - $branch_with_slashes"
+          git push --set-upstream origin $argocd_branch_name
