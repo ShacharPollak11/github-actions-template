@@ -9,7 +9,7 @@ on:
       environment:
         required: true
         type: string
-      pr_branch:
+      tag:
         required: true
         type: string
 
@@ -27,43 +27,6 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_ARGOCD }}
           ref: dev
           fetch-depth: 0
-      
-      - name: Find Pull Request
-        uses: juliangruber/find-pull-request-action@v1
-        id: find-pull-request
-        with:
-          branch: ${{ inputs.pr_branch }}
-    
-      - run: echo "Pull Request ${number} (${sha})"
-        env:
-          number: ${{ steps.find-pull-request.outputs.number }}
-          sha: ${{ steps.find-pull-request.outputs.head-sha }}
-
-      - name: Check if ${{ inputs.pr_branch }} is up to date with dev branch
-        id: check_if_up_to_date
-        env:
-          pr_branch: ${{ inputs.pr_branch }}
-        run: |
-          echo "Check if ${{ inputs.pr_branch }} is up to date with dev branch"
-          git fetch
-          git checkout ${{ inputs.pr_branch }}
-          git pull origin dev
-          git checkout dev
-          git pull origin dev
-          git checkout ${{ inputs.pr_branch }}
-          git merge dev
-          if [ $? -ne 0 ]; then
-            echo "Merge between ${{ inputs.pr_branch }} and dev has conflicts, please resolve them and push again"
-            exit 1
-          fi
-
-      - name: Merge Pull Request
-        uses: juliangruber/merge-pull-request-action@v1
-        with:
-          github-token: ${{ secrets.REPO_ACCESS_ARGOCD }}
-          number: ${{ steps.find-pull-request.outputs.number }}
-          method: squash # merge rebase
-          repo: brightsource-il/argocd
 
       - name: Check if service folder exists in $ENVIRONMENT
         id: check_service_folder
@@ -71,34 +34,31 @@ jobs:
           SERVICES: ${{ inputs.services }}
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          for service in $SERVICES; do
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
+          for service in ${services_array[@]}; do
             if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
-              cp -R helm/dev/$service helm/$ENVIRONMENT/$service
-              echo "service_exists=false" >> "$GITHUB_OUTPUT"
-              rm -rf helm/$ENVIRONMENT/$service/values_dev.yaml
-              if [ $ENVIRONMENT == 'qa' ]; then
-                echo "values_$ENVIRONMENT.yaml exists"
-                rm -rf helm/$ENVIRONMENT/$service/values_staging.yaml
-                rm -rf helm/$ENVIRONMENT/$service/values_prod.yaml
-              else
+              if [ $ENVIRONMENT == 'dev' ]; then
+                echo "Please Merge existing PR to $ENVIRONMENT branch"
                 exit 1
               fi
-            else
-              echo "service_exists=true" >> "$GITHUB_OUTPUT"
-              echo "service folder exists in $ENVIRONMENT"
-            fi
           done
 
-      - name: Get image tag dev values file and override tag in $ENVIRONMENT
-        id: tag
+      - name: Get image tag
         env:
           SERVICES: ${{ inputs.services }}
           ENVIRONMENT: ${{ inputs.environment }}
+          TAG: ${{ inputs.tag }}
         run: |
-          echo "Replace values from dev folder to $ENVIRONMENT folder"
-          for service in $SERVICES; do
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
+          for service in ${services_array[@]}; do
             echo "service: $service"
-            cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
+            echo "tag: $TAG"
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_prod.yaml
           done
 
       - name: Commit and push changes to argocd repo
@@ -110,3 +70,16 @@ jobs:
           git add -A 
           git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
           git push --set-upstream origin dev
+      
+      
+
+      - name: sync argocd applicationset
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
+            echo "sync argocd applicationset"
+            argocd app sync $ENVIRONMENT -n argocd
+          else
+            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
+          fi
