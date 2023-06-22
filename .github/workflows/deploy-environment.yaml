@@ -1,0 +1,75 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+  
+permissions:
+  contents: read
+
+env:
+  aws_region: us-east-1
+
+jobs:
+  deploy-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Checkout argocd
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/argocd
+          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ref: dev
+          fetch-depth: 0
+      
+      - name: Check if service folder exists in $ENVIRONMENT
+        id: check_service_folder
+        if: ${{ inputs.environment }} != 'dev'
+        env:
+          SERVICES: ${{ inputs.services }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
+          for service in ${services_array[@]}; do
+            if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
+              echo "service is not exists in $ENVIRONMENT folder, please create a PR and Add helm chart for $service to $ENVIRONMENT folder"
+              exit 1
+            fi
+          done
+
+      - name: Get image tag dev values file and override tag in $ENVIRONMENT
+        id: tag
+        if: ${{ inputs.environment }} != 'dev'
+        env:
+          SERVICES: ${{ inputs.services }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "Replace values from dev folder to $ENVIRONMENT folder"
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
+          for service in ${services_array[@]}; do
+            echo "service: $service"
+            cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
+            cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
+          done
+
+      - name: Sync ArgoCD ApplicationSet
+        run: |
+          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
+            echo "sync argocd applicationset"
+            argocd app sync $ENVIRONMENT -n argocd
+          else
+            kubectl apply -f ./applicationSets/apply-$ENVIRONMENT-env.yaml -n argocd
+          fi
+
+
+

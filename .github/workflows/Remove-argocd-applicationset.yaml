@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   Remove-argocd-applicationset:
-    if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -42,12 +41,6 @@ jobs:
             echo "Git branch '${{ github.event.repository.name }}-$branch_without_slashes' does not exist in the remote repository."
           fi
 
-
-          # if git rev-parse --verify --quiet origin/${{ github.event.ref }}; 
-          # then
-          #   git push origin --delete ${{ github.event.repository.name }}-${{ github.event.ref }}; 
-          # fi
-      
       - name: Delete applicationset from argocd namespace
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}

@@ -21,6 +21,8 @@ on:
       ecr_registry:
         type: string
         default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
+    outputs:
+      run_id: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
   contents: read
@@ -52,17 +54,6 @@ jobs:
         run: |
           aws ecr describe-repositories --repository-names ${{ inputs.service_name }} \
           || aws ecr create-repository --repository-name ${{ inputs.service_name }}
-
-      # - name: Download ecr policy 
-      #   id: default_ecr_policy
-      #   run: |
-      #     content=`curl https://raw.githubusercontent.com/brightsource-il/github-actions-template/main/.github/templates/ecr-policy.json`
-      #     # the following lines are only required for multi line json
-      #     content="${content//'%'/'%25'}"
-      #     content="${content//$'\n'/'%0A'}"
-      #     content="${content//$'\r'/'%0D'}"
-      #     # end of optional handling for multi line json
-      #     echo "policy=$content" >> $GITHUB_OUTPUT
 
       - name: Lifecycle policy check/creation
         run: |
@@ -123,62 +114,8 @@ jobs:
         id: output_run_id
         run: echo "run_id=${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
-
-
-#      - name: Build and Push Docker Image
-#        uses: docker/build-push-action@v2
- #       # - name: Docker build and push
-  #      #if: ${{ github.event.pull_request.merged != true }} check if the trigger wasn't pull request merged
-   #     with:
-    #      if: ${{ github.event.pull_request.merged != true }}
-     #     run: |
-      #      short_sha=$(git rev-parse --short "$GITHUB_SHA")
-       #     echo "short_sha: $short_sha"
-#
- #           echo "replace all slashes in branch name"
-  #          if [ -z "$GITHUB_HEAD_REF" ]; then
-   #           echo "We are NOT IN a pull request"
-     #         branch_with_slashes=${{ github.ref_name }}
-      #        branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-       #     else
-        #      echo "We are IN a pull request"
-         #     branch_with_slashes=${{ github.head_ref }}
-          #    branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
-           # fi
-            #echo "branch_without_slashes: $branch_without_slashes"
-            #echo "branch_with_slashes: $branch_with_slashes"
-#
- #           docker build \
-  #          -o type=registry \
-   #         -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$short_sha" \
-    #        -t "${{ inputs.ecr_registry }}/${{ inputs.service_name }}:$branch_without_slashes" \
-     #       -f ${{ inputs.dockerfile_path }} \
-            # ${{ inputs.context_path }} \
-
-        # - name: Retag Untagged
-        #   if: ${{ github.event.pull_request.merged != true }}
-        #   run: |
-        #     aws sts get-caller-identity
-
-        #     # Get a list of all untagged images in the ECR repository
-        #     images=$(aws ecr list-images --repository-name ${{ inputs.service_name }} --query "imageIds[?imageTag==null].[imageDigest]")
-
-        #     # Loop through each image and retag it with the short SHA and image platform
-        #     for image in $images
-        #       do
-        #       # Get the image manifest
-        #       manifest=$(aws ecr batch-get-image --repository-name ${{ inputs.service_name }} --image-ids imageDigest=$image --query "images[0].imageManifest" --output text)
-
-        #       # Extract the image platform from the manifest
-        #       platform=$(echo $manifest | jq -r '.config.Labels."org.label-schema.os"')
-        #       # Retag the image
-        #       aws ecr tag-image --repository-name ${{ inputs.service_name }} --image-digest $image --tags "short_sha=$short_sha,platform=$platform"
-        #       # Push the image to ECR
-        #       aws ecr push --repository-name ${{ inputs.service_name }} --image-digest $image
-        #     done
-
       - name: Retag ${{ inputs.service_name }} as dev
-        if: ${{ github.event.pull_request.merged == true }}
+        if: ${{ github.event.name == 'push' }}
         uses: abronin/ecr-retag-action@v1.6.0
         with:
           repository: ${{ inputs.service_name }}
