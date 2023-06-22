@@ -59,6 +59,7 @@ jobs:
           for service in ${services_array[@]}; do
             echo "service: $service"
             cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
+            cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
           done
 
       - name: Sync ArgoCD ApplicationSet
@@ -67,7 +68,7 @@ jobs:
             echo "sync argocd applicationset"
             argocd app sync $ENVIRONMENT -n argocd
           else
-            kubectl apply -f ./applicationSets/$ENVIRONMENT/apply-$ENVIRONMENT-env.yaml -n argocd
+            kubectl apply -f ./applicationSets/apply-$ENVIRONMENT-env.yaml -n argocd
           fi
 
 
