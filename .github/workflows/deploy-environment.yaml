@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: brightsource-il/argocd
-          token: ${{ secrets.REPO_ACCESS_ARGOCD }}
+          ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
           ref: dev
           fetch-depth: 0
       
