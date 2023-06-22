@@ -37,6 +37,10 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      services: 
+        description: "The services to build"
+        value: ${{ jobs.read-json.outputs.services }}
 
 jobs:
   read-json:
