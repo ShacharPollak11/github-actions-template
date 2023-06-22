@@ -62,7 +62,6 @@ jobs:
           done
 
       - name: Commit and push changes to argocd repo
-        needs: tag
         run: |
           echo "Commit and push changes to argocd repo"
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
