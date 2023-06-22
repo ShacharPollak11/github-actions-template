@@ -22,7 +22,9 @@ on:
         type: string
         default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
     outputs:
-      run_id: ${{ jobs.build-push-ecr.outputs.run_id }}
+      run_id: 
+        description: "The run id of the build-push-ecr job"
+        value: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
   contents: read
