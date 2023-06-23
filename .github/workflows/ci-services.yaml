@@ -37,8 +37,12 @@ on:
         required: false
         type: boolean
         default: true
+      enable-coverity:
+        required: false
+        type: boolean
+        default: true
     outputs:
-      services: 
+      services:
         description: "The services to build"
         value: ${{ jobs.read-json.outputs.services }}
 
@@ -81,3 +85,4 @@ jobs:
       enable-snyk: ${{ inputs.enable-snyk }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       enable-polaris: ${{inputs.enable-polaris}}
+      enable-coverity: ${{inputs.enable-coverity}}

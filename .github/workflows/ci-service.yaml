@@ -49,6 +49,10 @@ on:
         required: false
         type: boolean
         default: true
+      enable-coverity:
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -104,3 +108,8 @@ jobs:
     # with:
     #   solution_file: ${{ inputs.solution_file }}
     #   context_path: ${{ inputs.context_path }}
+
+  coverity:
+    if: ${{ inputs.enable-coverity }}
+    uses: ./.github/workflows/coverity.yaml
+    secrets: inherit
