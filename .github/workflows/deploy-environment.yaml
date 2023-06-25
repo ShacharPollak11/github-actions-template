@@ -59,11 +59,13 @@ jobs:
           echo "Replace values from dev folder to $ENVIRONMENT folder"
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service in ${services_array[@]}; do
-            echo "service: $service"
-            cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
-            cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
-          done
+          if [ "$ENVIRONMENT" != "dev" ]; then
+            for service in ${services_array[@]}; do
+              echo "service: $service"
+              cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
+              cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
+            done
+          fi
 
       - name: Sync ArgoCD ApplicationSet
         run: |
