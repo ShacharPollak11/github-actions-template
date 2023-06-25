@@ -77,9 +77,11 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
-            echo "sync argocd applicationset"
-            argocd app sync $ENVIRONMENT -n argocd
-          else
-            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
-          fi
+          kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+
+          # if kubectl get appset $ENVIRONMENT-application-set -n argocd  &> /dev/null; then
+          #   echo "sync argocd applicationset"
+          #   argocd app sync $ENVIRONMENT-application-set -n argocd
+          # else
+          #  kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+          # fi
