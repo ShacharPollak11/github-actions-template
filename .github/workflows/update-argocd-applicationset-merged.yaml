@@ -86,6 +86,7 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
           kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
 
           # if kubectl get appset $ENVIRONMENT-application-set -n argocd  &> /dev/null; then
