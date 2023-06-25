@@ -94,7 +94,7 @@ jobs:
 
   build-push-ecr:
     if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
-    uses: ./.github/workflows/build-and-push-ecr.yaml
+    uses: ./.github/workflows/build-and-push-ecr.yaml@feature/update-argocd-apps
     secrets: inherit
     needs: test
     with:

@@ -73,7 +73,7 @@ jobs:
       fail-fast: false
       matrix:
         array: ${{ fromJson(needs.read-json.outputs.services) }}
-    uses: ./.github/workflows/ci-service.yaml
+    uses: ./.github/workflows/ci-service.yaml@feature/update-argocd-apps
     secrets: inherit
     name: CI for ${{ matrix.array.service_name }}
     with:
