@@ -116,3 +116,15 @@ jobs:
     if: ${{ inputs.enable-coverity }}
     uses: ./.github/workflows/coverity.yaml
     secrets: inherit
+
+  output_run_id:
+    runs-on: ubuntu-latest
+    needs: build-push-ecr
+    permissions:
+      contents: read
+    env:
+      run_id: ${{ needs.build-push-ecr.outputs.run_id }}
+    steps:
+      - name: Output run id
+        run: |
+          echo "run_id: $run_id"

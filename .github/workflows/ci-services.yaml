@@ -88,3 +88,15 @@ jobs:
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       enable-polaris: ${{inputs.enable-polaris}}
       enable-coverity: ${{inputs.enable-coverity}}
+
+  output_run_id:
+    runs-on: ubuntu-latest
+    needs: ci-service
+    permissions:
+      contents: read
+    env:
+      run_id: ${{ needs.ci-service.outputs.run_id }}
+    steps:
+      - name: Output run id
+        run: |
+          echo "run_id: $run_id"
