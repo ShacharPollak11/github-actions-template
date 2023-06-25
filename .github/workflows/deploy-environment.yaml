@@ -4,6 +4,9 @@ on:
       environment:
         required: true
         type: string
+      services:
+        required: true
+        type: string
   
 permissions:
   contents: read
