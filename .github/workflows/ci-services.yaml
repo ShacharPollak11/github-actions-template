@@ -45,6 +45,8 @@ on:
       services:
         description: "The services to build"
         value: ${{ jobs.read-json.outputs.services }}
+      run_id:
+        value: ${{ jobs.ci-service.outputs.run_id }}
 
 jobs:
   read-json:

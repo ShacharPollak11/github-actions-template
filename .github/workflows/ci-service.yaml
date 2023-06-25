@@ -53,6 +53,9 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      run_id:
+        value: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
   contents: read
