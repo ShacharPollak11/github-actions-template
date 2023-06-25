@@ -36,7 +36,7 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service in ${services_array[@]}; do
+          for service_name in ${services_array[@]}; do
             if [ ! -d "helm/dev/$service_name" ]; then
               echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch"
               exit 1
@@ -53,13 +53,13 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service in ${services_array[@]}; do
+          for service_name in ${services_array[@]}; do
             echo "service: $service"
             echo "tag: $TAG"
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_dev.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_qa.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_staging.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_prod.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_prod.yaml
           done
 
       - name: Commit and push changes to argocd repo
