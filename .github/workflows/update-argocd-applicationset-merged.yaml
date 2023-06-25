@@ -37,11 +37,12 @@ jobs:
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
           for service in ${services_array[@]}; do
-            if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
-              if [ $ENVIRONMENT == 'dev' ]; then
-                echo "Please Merge existing PR to $ENVIRONMENT branch"
-                exit 1
-              fi
+            if [ ! -d "helm/dev/$service_name" ]; then
+              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch"
+              exit 1
+            else
+              echo "service exists in argocd repository"
+            fi
           done
 
       - name: Get image tag
