@@ -26,6 +26,8 @@ jobs:
         with:
           repository: brightsource-il/argocd
           ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
+          ref: dev
+          fetch-depth: 0
 
       - name: Delete branch from argocd repo
         run: |
