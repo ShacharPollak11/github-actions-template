@@ -57,7 +57,7 @@ jobs:
         id: create_branch
         env:
           SERVICES: ${{ inputs.services }}
-          TAG: ${{ github.event.inputs.tag }}
+          TAG: ${{ inputs.tag }}
         run: |
           echo "replace all slashes in branch name"
           echo "A new pull request was opened/updated - without a merge"
