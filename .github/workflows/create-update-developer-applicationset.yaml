@@ -89,10 +89,10 @@ jobs:
           for service_name in ${services_array[@]}; do
             echo "service_name: $service_name"
             echo "tag: $TAG"
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_dev.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_qa.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_staging.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_prod.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_prod.yaml
           done
 
           git add -A 
