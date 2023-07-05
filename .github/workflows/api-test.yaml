@@ -20,13 +20,13 @@ jobs:
       - uses: actions/checkout@v3
       - name: Find all csproj
         run: |
-        
+
           # define empty arrays for service names and versions
           declare -a service_names
           declare -a versions
 
           # loop through each .csproj file in the current directory and its subdirectories
-          for file in $(find ${{ input.context_path }} -name "*.csproj")
+          for file in $(find ${{ inputs.context_path }} -name "*.csproj")
           do
               # loop through each matching line in the current file
               while IFS= read -r line
