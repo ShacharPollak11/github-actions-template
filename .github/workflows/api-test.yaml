@@ -1,0 +1,23 @@
+name: Test API
+
+on:
+  workflow_call:
+    inputs:
+      context_path:
+        required: true
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Find csproj
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Find all csproj
+        run: |
+          echo hello
