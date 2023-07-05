@@ -20,4 +20,27 @@ jobs:
       - uses: actions/checkout@v3
       - name: Find all csproj
         run: |
-          echo hello
+          #!/bin/bash
+
+          # define empty arrays for service names and versions
+          declare -a service_names
+          declare -a versions
+
+          # loop through each .csproj file in the current directory and its subdirectories
+          for file in $(find ${{ input.context_path }} -name "*.csproj")
+          do
+              # loop through each matching line in the current file
+              while IFS= read -r line
+              do
+                  # use regex to parse the service name and version
+                  if [[ $line =~ Bse\.(.*)\.Api\.Server\"\ Version=\"(.*)\" ]] ; then
+                      # append to the arrays
+                      service_names+=(${BASH_REMATCH[1]})
+                      versions+=(${BASH_REMATCH[2]})
+                  fi
+              done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
+          done
+
+          # print the arrays
+          echo "Service Names: ${service_names[@]}"
+          echo "Versions: ${versions[@]}"
