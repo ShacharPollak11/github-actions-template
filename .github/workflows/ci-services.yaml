@@ -81,6 +81,7 @@ jobs:
       solution_file: ${{ matrix.array.solution_file }}
       dockerfile_path: ${{ matrix.array.dockerfile_path }}
       service_name: ${{ matrix.array.service_name }}
+      enable_api_tests: ${{ matrix.array.enable_api_tests }}
       enable-test: ${{ inputs.enable-test }}
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
