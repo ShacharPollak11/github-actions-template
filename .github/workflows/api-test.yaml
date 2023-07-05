@@ -40,6 +40,38 @@ jobs:
               done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
           done
 
+          service_names+="AuthorizationService"
+          versions+="10.0.0"
+
           # print the arrays
           echo "Service Names: ${service_names[@]}"
           echo "Versions: ${versions[@]}"
+
+          # Transform the array into a JSON list of objects
+          services_json="["
+          for index in "${!service_names[@]}"; do
+              services_json+="{\"name\": \"${service_names[index]}\", \"version\": \"${versions[index]}\"},"
+          done
+          # remove trailing comma and close the json array
+          services_json="${services_json::-1}]"
+
+          echo ::set-output name=services::"$services_json"
+
+  postman_tests:
+    needs: check_csproj
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{fromJson(needs.check_csproj.outputs.services)}}
+    steps:
+      - name: Checkout API-tests repo
+        uses: actions/checkout@v2
+        with:
+          repository: org/API-tests # replace with your repository name
+          path: ./API-tests
+
+      - name: Run Postman tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_collection.json
+          environment: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_environment.json
