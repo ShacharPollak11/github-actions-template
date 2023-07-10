@@ -64,8 +64,17 @@ jobs:
               echo "service: $service"
               cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
               cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
-            done
+            done      
           fi
+      
+      - name: Commit and push changes to argocd repo
+        run: |
+          echo "Commit and push changes to argocd repo"
+          git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
+          git fetch
+          git add -A 
+          git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
+          git push --set-upstream origin dev
 
       - name: Sync ArgoCD ApplicationSet
         run: |

@@ -38,21 +38,6 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      - name: Check if service exists in argocd repository
-        env:
-          SERVICES: ${{ inputs.services }}
-        run: |
-          services_array=$(echo "$SERVICES" | jq -r '.[]')
-          readarray -t array <<< "$services_array"
-          for service_name in ${services_array[@]}; do
-            if [ ! -d "helm/dev/$service_name" ]; then
-              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch"
-              exit 1
-            else
-              echo "service exists in argocd repository"
-            fi
-          done
-
       - name: Create and update branch in argocd repo
         id: create_branch
         env:
@@ -87,6 +72,12 @@ jobs:
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
           for service_name in ${services_array[@]}; do
+            if [ ! -d "helm/dev/$service_name" ]; then
+              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch from the branch $argocd_branch_name"
+              exit 1
+            else
+              echo "service exists in argocd repository"
+            fi
             echo "service_name: $service_name"
             echo "tag: $TAG"
             sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_dev.yaml
