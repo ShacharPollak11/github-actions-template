@@ -78,12 +78,7 @@ jobs:
       - name: Sync ArgoCD ApplicationSet
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
-            echo "sync argocd applicationset"
-            argocd app sync $ENVIRONMENT -n argocd
-          else
-            kubectl apply -f ./applicationSets/apply-$ENVIRONMENT-env.yaml -n argocd
-          fi
+          kubectl apply -f ./applicationSets/apply-$ENVIRONMENT-env.yaml -n argocd
 
 
 
