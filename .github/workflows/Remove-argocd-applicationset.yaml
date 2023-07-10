@@ -32,7 +32,7 @@ jobs:
       - name: Delete branch from argocd repo
         run: |
           git remote show origin | grep "Push  URL"  #Make sure we are in argocd repo
-          branch_without_slashes=$(echo "${{ github.ref }}" | sed 's/\//-/g')
+          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
           git ls-remote --exit-code --heads origin ${{ github.event.repository.name }}-$branch_without_slashes
           EXIT_CODE=$?
 
@@ -46,7 +46,7 @@ jobs:
       - name: Delete applicationset from argocd namespace
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          branch_without_slashes=$(echo "${{ github.ref }}" | sed 's/\//-/g')
+          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
           if kubectl get appset ${{ github.event.repository.name }}-$branch_without_slashes -n argocd  &> /dev/null; 
           then
             kubectl delete appset ${{ github.event.repository.name }}-$branch_without_slashes -n argocd; 
@@ -54,7 +54,7 @@ jobs:
       
       - name: Delete namespace from kubernetes
         run: |
-          branch_without_slashes=$(echo "${{ github.ref }}" | sed 's/\//-/g')
+          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
           if kubectl get namespace ${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
           then 
             kubectl delete namespace ${{ github.event.repository.name }}-$branch_without_slashes; 
