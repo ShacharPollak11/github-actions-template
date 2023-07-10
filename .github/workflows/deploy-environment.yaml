@@ -62,8 +62,7 @@ jobs:
           if [ "$ENVIRONMENT" != "dev" ]; then
             for service in ${services_array[@]}; do
               echo "service: $service"
-              cp -f helm/dev/$service/values_$ENVIRONMENT.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
-              cp -f helm/dev/$service/values.yaml helm/$ENVIRONMENT/$service/values.yaml
+              cp -f helm/dev/$service/values_dev.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
             done      
           fi
       
