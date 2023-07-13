@@ -16,6 +16,9 @@ jobs:
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
+    outputs:
+      json_mapping: ${{ steps.find_csproj.outputs.services }}
+      lala: ${{ steps.find_csproj.outputs.lala }}
     steps:
       - uses: actions/checkout@v3
       - name: Install jq
@@ -84,13 +87,13 @@ jobs:
     runs-on: ubuntu-latest
     # strategy:
     #   matrix:
-    #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
+    #     service: ${{fromJson(needs.check_csproj.outputs.lala)}}
     steps:
       - run: |
           echo $GITHUB_ENV
-          echo "Services: ${{ needs.check_csproj.find_csproj.outputs.services }}"
+          echo "Services: ${{needs.check_csproj.outputs.json_mapping}}"
           echo "lala: ${{ needs.check_csproj.outputs.lala }}"
-          echo "lala2: "${{ jobs.check_csproj.steps.find_csproj.outputs.services }}""
+          # echo "lala2: "${{ jobs.check_csproj.steps.find_csproj.outputs.services }}""
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
