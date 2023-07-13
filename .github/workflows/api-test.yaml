@@ -86,7 +86,7 @@ jobs:
     #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
       - run: |
-          echo "Services: ${{ needs.check_csproj.outputs.services }}"
+          echo "Services: ${{ needs.check_csproj.find_csproj.outputs.services }}"
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
