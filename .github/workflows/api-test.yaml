@@ -70,12 +70,7 @@ jobs:
           echo "service Json: $services_json"
           echo $services_json > services.json
 
-          # echo ::set-output name=services::"$services_json"
-      - name: Upload JSON
-        uses: actions/upload-artifact@v2
-        with:
-          name: services
-          path: services.json
+          echo ::set-output name=services::"$services_json"
 
   postman_tests:
     needs: check_csproj
@@ -84,6 +79,7 @@ jobs:
       matrix:
         service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
+      - run: echo "Services: ${{ steps.create-json.outputs.services }}"
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
@@ -92,19 +88,6 @@ jobs:
       #     ref: 'API-tests/AuthorizationService/1.0.0'
       #     token: ""
       - uses: actions/checkout@v3
-      
-      - name: Download JSON
-        uses: actions/download-artifact@v2
-        with:
-          name: services
-          path: services.json
-
-      - name: Read JSON
-        id: json
-        run: |
-          services=$(cat services.json)
-          echo "Services: $services"
-          echo "SERVICE_JSON=$services" >> $GITHUB_ENV
 
       # - name: Run Postman tests
       #   uses: matt-ball/newman-action@master
@@ -113,8 +96,6 @@ jobs:
       #     environment: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_environment.json
 
       - name: Run Postman tests
-        matrix:
-          service: ${{fromJson(env.SERVICE_JSON)}}
         uses: matt-ball/newman-action@master
         with:
           collection: ./AuthorizationService.postman_environment.json
