@@ -18,13 +18,8 @@ jobs:
       contents: read
     outputs:
       json_mapping: ${{ steps.find_csproj.outputs.services }}
-      lala: ${{ steps.find_csproj.outputs.lala }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
       - name: Find all csproj
         id: find_csproj
         run: |
@@ -52,15 +47,11 @@ jobs:
               done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
           done
 
-          # service_names+="AuthorizationService"
-          # versions+="10.0.0"
-
           # print the arrays
           echo "Service Names: ${service_names[@]}"
           echo "Versions: ${versions[@]}"
 
           # Transform the array into a JSON list of objects
-
           services_json="["
           for index in "${!service_names[@]}"; do
               single_service_json=$(jq -n \
@@ -77,10 +68,8 @@ jobs:
           # print it out for debugging
           echo "Single line service JSON: $services_json_single_line"
 
-          # write it to the GitHub environment
+          # Pass the JSON to the next job
           echo "services=$services_json_single_line" >> $GITHUB_OUTPUT
-          echo "lala=bubu" >> $GITHUB_OUTPUT
-          #echo ::set-output name=services::"$services_json"
 
   postman_tests:
     needs: check_csproj
@@ -92,9 +81,6 @@ jobs:
       - run: |
           echo "${{ matrix.service.name }}"
           echo "${{ matrix.service.version }}"
-          echo "Output2: ${{ env.OUTPUT2 }}"
-          echo "Services: ${{needs.check_csproj.outputs.json_mapping}}"
-          echo "lala: ${{ needs.check_csproj.outputs.lala }}"
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
@@ -107,8 +93,8 @@ jobs:
       # - name: Run Postman tests
       #   uses: matt-ball/newman-action@master
       #   with:
-      #     collection: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_collection.json
-      #     environment: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_environment.json
+      #     collection: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
+      #     environment: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
 
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
