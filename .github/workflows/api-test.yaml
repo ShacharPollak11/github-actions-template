@@ -78,8 +78,8 @@ jobs:
           echo "Single line service JSON: $services_json_single_line"
 
           # write it to the GitHub environment
-          echo "services=$services_json_single_line" >> $GITHUB_ENV
-          echo "lala=bubu" >> $GITHUB_ENV
+          echo "services=$services_json_single_line" >> $GITHUB_OUTPUT
+          echo "lala=bubu" >> $GITHUB_OUTPUT
           #echo ::set-output name=services::"$services_json"
 
   postman_tests:
