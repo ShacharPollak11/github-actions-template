@@ -76,6 +76,7 @@ jobs:
 
           # write it to the GitHub environment
           echo "services=$services_json_single_line" >> $GITHUB_ENV
+          echo "lala=bubu" >> $GITHUB_ENV
           #echo ::set-output name=services::"$services_json"
 
   postman_tests:
@@ -86,7 +87,9 @@ jobs:
     #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
       - run: |
+          echo $GITHUB_ENV
           echo "Services: ${{ needs.check_csproj.find_csproj.outputs.services }}"
+          echo "lala: ${{ needs.check_csproj.outputs.lala }}"
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
