@@ -93,7 +93,7 @@ jobs:
           args: ${{ inputs.args }}
           projects: ${{ inputs.project  }}  
       - uses: mansagroup/nrwl-nx-action@main #change to latest after they fix nx clud support of --scan arg
-        if: ${{ inputs.storybook }} == false && ${{ inputs.nx }}
+        if: ${{ inputs.storybook }} == false && ${{ inputs.nx }} == true
         with:
           targets: build
           nxCloud: true
