@@ -32,6 +32,9 @@ on:
       node_version:
         type: number
         default: 14
+      nx:
+        type: boolean
+        default: true
       yarn:
         type: boolean
         default: false
@@ -90,14 +93,19 @@ jobs:
           args: ${{ inputs.args }}
           projects: ${{ inputs.project  }}  
       - uses: mansagroup/nrwl-nx-action@main #change to latest after they fix nx clud support of --scan arg
-        if: ${{ inputs.storybook }} == false
+        if: ${{ inputs.storybook }} == false && ${{ inputs.nx }}
         with:
           targets: build
           nxCloud: true
           workingDirectory: ${{ inputs.context_path }}
           args: ${{ inputs.args }}
           projects: ${{ inputs.project  }}
-
+          
+      - name: NG build
+        if:  ${{ inputs.nx }} == false
+        working-directory: ${{ inputs.context_path }}
+        run: npx ng build  
+        
       - name: "Set bucket name "
         run: |
           if [ '${{ inputs.bucket_name }}' != '' ]; then
