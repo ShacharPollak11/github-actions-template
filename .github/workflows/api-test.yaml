@@ -55,13 +55,11 @@ jobs:
 
           # Transform the array into a JSON list of objects
 
-          jq -n \
-            --arg name "$service_names" \
-            --arg version "$versions" \
-            '{name: $name, version: $version}' 
+          services_json=$(jq -n \
+                      --arg name "$service_names" \
+                      --arg version "$versions" \
+                      '{name: $name, version: $version}')
 
-          # remove trailing comma and close the json array
-          # services_json="${services_json::-1}]"
           echo "service Json: $services_json"
 
           echo ::set-output name=services::"$services_json"
