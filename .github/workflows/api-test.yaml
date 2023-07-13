@@ -46,8 +46,8 @@ jobs:
               done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
           done
 
-          service_names+="AuthorizationService"
-          versions+="10.0.0"
+          # service_names+="AuthorizationService"
+          # versions+="10.0.0"
 
           # print the arrays
           echo "Service Names: ${service_names[@]}"
