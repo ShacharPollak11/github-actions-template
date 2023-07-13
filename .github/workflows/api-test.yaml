@@ -68,9 +68,14 @@ jobs:
           done
           services_json="${services_json%?}]"
 
-          echo "service Json: $services_json"
+          # remove newline characters
+          services_json_single_line=$(echo $services_json | tr -d '\n')
 
-          echo "services=$services_json" >> "$GITHUB_OUTPUT"
+          # print it out for debugging
+          echo "Single line service JSON: $services_json_single_line"
+
+          # write it to the GitHub environment
+          echo "services=$services_json_single_line" >> $GITHUB_ENV
           #echo ::set-output name=services::"$services_json"
 
   postman_tests:
