@@ -72,10 +72,10 @@ jobs:
 
           # echo ::set-output name=services::"$services_json"
       - name: Upload JSON
-          uses: actions/upload-artifact@v2
-          with:
-            name: services
-            path: services.json
+        uses: actions/upload-artifact@v2
+        with:
+          name: services
+          path: services.json
 
   postman_tests:
     needs: check_csproj
