@@ -89,8 +89,12 @@ jobs:
     #   matrix:
     #     service: ${{fromJson(needs.check_csproj.outputs.lala)}}
     steps:
+      - env:
+          OUTPUT1: ${{needs.check_csproj.outputs.json_mapping}}
+          OUTPUT2: ${{needs.check_csproj.outputs.lala}}
       - run: |
-          echo $GITHUB_ENV
+          echo "Output1: ${{ env.OUTPUT1 }}"
+          echo "Output2: ${{ env.OUTPUT2 }}"
           echo "Services: ${{needs.check_csproj.outputs.json_mapping}}"
           echo "lala: ${{ needs.check_csproj.outputs.lala }}"
       # - name: Checkout API-tests repo
