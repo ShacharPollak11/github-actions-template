@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    name: Find csproj
+    name: check_csproj
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
@@ -67,7 +67,7 @@ jobs:
       - name: Checkout API-tests repo
         uses: actions/checkout@v2
         with:
-          repository: org/API-tests # replace with your repository name
+          repository: brightsource-il/oases-qa # replace with your repository name
           path: ./API-tests
 
       - name: Run Postman tests
