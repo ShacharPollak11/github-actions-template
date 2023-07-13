@@ -93,7 +93,6 @@ jobs:
           echo $GITHUB_ENV
           echo "Services: ${{needs.check_csproj.outputs.json_mapping}}"
           echo "lala: ${{ needs.check_csproj.outputs.lala }}"
-          # echo "lala2: "${{ jobs.check_csproj.steps.find_csproj.outputs.services }}""
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
