@@ -75,9 +75,9 @@ jobs:
   postman_tests:
     needs: check_csproj
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: ${{fromJson(needs.check_csproj.outputs.services)}}
+    # strategy:
+    #   matrix:
+    #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
       - run: echo "Services: ${{ steps.create-json.outputs.services }}"
       # - name: Checkout API-tests repo
