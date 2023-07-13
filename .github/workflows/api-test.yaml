@@ -18,6 +18,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
       - name: Find all csproj
         run: |
 
@@ -50,10 +54,12 @@ jobs:
           echo "Versions: ${versions[@]}"
 
           # Transform the array into a JSON list of objects
-          services_json="["
-          for index in "${!service_names[@]}"; do
-              services_json+="{\"name\": \"${service_names[index]}\", \"version\": \"${versions[index]}\"},"
-          done
+
+          jq -n \
+            --arg name "$service_names" \
+            --arg version "$versions" \
+            '{name: $name, version: $version}' 
+
           # remove trailing comma and close the json array
           services_json="${services_json::-1}]"
           echo "service Json: $services_json"
