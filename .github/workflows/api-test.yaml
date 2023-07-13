@@ -35,7 +35,9 @@ jobs:
                   if [[ $line =~ Bse\.(.*)\.Api\.Server\"\ Version=\"(.*)\" ]] ; then
                       # append to the arrays
                       service_names+=(${BASH_REMATCH[1]})
+                      service_names+=" "
                       versions+=(${BASH_REMATCH[2]})
+                      versions+=" "
                   fi
               done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
           done
@@ -54,24 +56,31 @@ jobs:
           done
           # remove trailing comma and close the json array
           services_json="${services_json::-1}]"
+          echo "service Json: $services_json"
 
           echo ::set-output name=services::"$services_json"
 
   postman_tests:
     needs: check_csproj
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: ${{fromJson(needs.check_csproj.outputs.services)}}
+    # strategy:
+    #   matrix:
+    #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
       - name: Checkout API-tests repo
         uses: actions/checkout@v2
         with:
           repository: brightsource-il/oases-qa # replace with your repository name
           path: ./API-tests
+          ref: 'API-tests/AuthorizationService/1.0.0'
 
+      # - name: Run Postman tests
+      #   uses: matt-ball/newman-action@master
+      #   with:
+      #     collection: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_collection.json
+      #     environment: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_environment.json
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_collection.json
-          environment: ./API-tests/${{ matrix.service.name }}/1.0.0/postman_environment.json
+          collection: API-tests/AuthorizationService/1.0.0/AuthorizationService.postman_environment.json
+          environment: ./API-tests/AuthorizationService/1.0.0/Bse.AuthService.postman_collection.json
