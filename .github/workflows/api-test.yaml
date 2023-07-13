@@ -23,6 +23,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
       - name: Find all csproj
+        id: find_csproj
         run: |
 
           # define empty arrays for service names and versions
@@ -68,9 +69,9 @@ jobs:
           services_json="${services_json%?}]"
 
           echo "service Json: $services_json"
-          echo $services_json > services.json
 
-          echo ::set-output name=services::"$services_json"
+          echo "services=$services_json" >> "$GITHUB_OUTPUT"
+          #echo ::set-output name=services::"$services_json"
 
   postman_tests:
     needs: check_csproj
@@ -80,7 +81,7 @@ jobs:
     #     service: ${{fromJson(needs.check_csproj.outputs.services)}}
     steps:
       - run: |
-          echo "Services: ${{ needs.create-json.outputs.services }}"
+          echo "Services: ${{ needs.check_csproj.outputs.services }}"
       # - name: Checkout API-tests repo
       #   uses: actions/checkout@v3
       #   with:
