@@ -69,30 +69,30 @@ jobs:
 
         echo ::set-output name=services::"$services_json"
 
-  postman_tests:
-    needs: check_csproj
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: ${{fromJson(needs.check_csproj.outputs.services)}}
-    steps:
-      # - name: Checkout API-tests repo
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: brightsource-il/oases-qa # replace with your repository name
-      #     path: ./API-tests
-      #     ref: 'API-tests/AuthorizationService/1.0.0'
-      #     token: ""
-      - uses: actions/checkout@v3
+  # postman_tests:
+  #   needs: check_csproj
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       service: ${{fromJson(needs.check_csproj.outputs.services)}}
+  #   steps:
+  #     # - name: Checkout API-tests repo
+  #     #   uses: actions/checkout@v3
+  #     #   with:
+  #     #     repository: brightsource-il/oases-qa # replace with your repository name
+  #     #     path: ./API-tests
+  #     #     ref: 'API-tests/AuthorizationService/1.0.0'
+  #     #     token: ""
+  #     - uses: actions/checkout@v3
 
-      # - name: Run Postman tests
-      #   uses: matt-ball/newman-action@master
-      #   with:
-      #     collection: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_collection.json
-      #     environment: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_environment.json
+  #     # - name: Run Postman tests
+  #     #   uses: matt-ball/newman-action@master
+  #     #   with:
+  #     #     collection: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_collection.json
+  #     #     environment: ./API-tests/${{ matrix.service.name }}/1.0.0/${{ matrix.service.name }}.postman_environment.json
 
-      - name: Run Postman tests
-        uses: matt-ball/newman-action@master
-        with:
-          collection: ./AuthorizationService.postman_environment.json
-          environment: ./Bse.AuthService.postman_collection.json
+  #     - name: Run Postman tests
+  #       uses: matt-ball/newman-action@master
+  #       with:
+  #         collection: ./AuthorizationService.postman_environment.json
+  #         environment: ./Bse.AuthService.postman_collection.json
