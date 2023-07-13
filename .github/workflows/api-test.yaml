@@ -55,14 +55,19 @@ jobs:
 
           # Transform the array into a JSON list of objects
 
-          services_json=$(jq -n \
-                      --arg name "$service_names" \
-                      --arg version "$versions" \
-                      '{name: $name, version: $version}')
+        services_json="["
+        for index in "${!service_names[@]}"; do
+            single_service_json=$(jq -n \
+                    --arg name "${service_names[index]}" \
+                    --arg version "${versions[index]}" \
+                    '{name: $name, version: $version}')
+            services_json+="$single_service_json,"
+        done
+        services_json="${services_json%?}]"
 
-          echo "service Json: $services_json"
+        echo "service Json: $services_json"
 
-          echo ::set-output name=services::"$services_json"
+        echo ::set-output name=services::"$services_json"
 
   postman_tests:
     needs: check_csproj
