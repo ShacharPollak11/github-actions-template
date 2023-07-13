@@ -89,9 +89,9 @@ jobs:
     #   matrix:
     #     service: ${{fromJson(needs.check_csproj.outputs.lala)}}
     steps:
-      - env:
-          OUTPUT1: ${{needs.check_csproj.outputs.json_mapping}}
-          OUTPUT2: ${{needs.check_csproj.outputs.lala}}
+      # - env:
+      #     OUTPUT1: ${{needs.check_csproj.outputs.json_mapping}}
+      #     OUTPUT2: ${{needs.check_csproj.outputs.lala}}
       - run: |
           echo "Output1: ${{ env.OUTPUT1 }}"
           echo "Output2: ${{ env.OUTPUT2 }}"
