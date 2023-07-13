@@ -39,9 +39,11 @@ jobs:
                   if [[ $line =~ Bse\.(.*)\.Api\.Server\"\ Version=\"(.*)\" ]] ; then
                       # append to the arrays
                       service_names+=(${BASH_REMATCH[1]})
-                      service_names+=" "
+                      echo "service name: ${BASH_REMATCH[1]}"
+                      # service_names+=" "
                       versions+=(${BASH_REMATCH[2]})
-                      versions+=" "
+                      echo "version: ${BASH_REMATCH[2]}"
+                      # versions+=" "
                   fi
               done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
           done
