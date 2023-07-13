@@ -99,5 +99,5 @@ jobs:
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: ./AuthorizationService.postman_environment.json
+          collection: .sdsd/AuthorizationService.postman_environment.json
           environment: ./Bse.AuthService.postman_collection.json
