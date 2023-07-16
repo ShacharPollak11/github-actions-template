@@ -1,7 +1,10 @@
 on:
   workflow_call:
     inputs:
-      environment:
+      source:
+        required: true
+        type: string
+      destination:
         required: true
         type: string
       services:
@@ -33,36 +36,37 @@ jobs:
           ref: dev
           fetch-depth: 0
       
-      - name: Check if service folder exists in $ENVIRONMENT
+      - name: Check if service folder exists in $DESTINATION
         id: check_service_folder
-        if: ${{ inputs.environment }} != 'dev'
+        if: ${{ inputs.destination }} != 'dev'
         env:
           SERVICES: ${{ inputs.services }}
-          ENVIRONMENT: ${{ inputs.environment }}
+          DESTINATION: ${{ inputs.destination }}
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
           for service in ${services_array[@]}; do
-            if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
-              echo "service is not exists in $ENVIRONMENT folder, please create a PR and Add helm chart for $service to $ENVIRONMENT folder"
+            if [ ! -d "helm/$DESTINATION/$service" ]; then
+              echo "service is not exists in $DESTINATION folder, please create a PR and Add helm chart for $service to $DESTINATION folder"
               exit 1
             fi
           done
 
-      - name: Get image tag dev values file and override tag in $ENVIRONMENT
+      - name: Get image tag dev values file and override tag in $DESTINATION
         id: tag
-        if: ${{ inputs.environment }} != 'dev'
+        if: ${{ inputs.destination }} != 'dev'
         env:
           SERVICES: ${{ inputs.services }}
-          ENVIRONMENT: ${{ inputs.environment }}
+          SOURCE: ${{ inputs.source }}
+          DESTINATION: ${{ inputs.destination }}
         run: |
-          echo "Replace values from dev folder to $ENVIRONMENT folder"
+          echo "Replace values from dev folder to $DESTINATION folder"
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          if [ "$ENVIRONMENT" != "dev" ]; then
+          if [ "$DESTINATION" != "dev" ]; then
             for service in ${services_array[@]}; do
               echo "service: $service"
-              cp -f helm/dev/$service/values_dev.yaml helm/$ENVIRONMENT/$service/values_$ENVIRONMENT.yaml
+              cp -f helm/$SOURCE/$service/values_$SOURCE.yaml helm/$DESTINATION/$service/values_$DESTINATION.yaml
             done      
           fi
       
@@ -72,13 +76,13 @@ jobs:
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
           git add -A 
-          git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
+          git diff-index --quiet HEAD || git commit -m "Updated $DESTINATION application set with new tag"
           git push --set-upstream origin dev
 
       - name: Sync ArgoCD ApplicationSet
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          kubectl apply -f ./applicationSets/apply-${{ inputs.environment }}-env.yaml -n argocd
+          kubectl apply -f ./applicationSets/apply-${{ inputs.destination }}-env.yaml -n argocd
 
 
 
