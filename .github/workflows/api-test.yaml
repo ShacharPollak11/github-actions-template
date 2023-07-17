@@ -94,7 +94,8 @@ jobs:
           token: ${{ secrets.API_TEST_TOKEN }}
 
       - run: |
-          ls -la
+          cd API-tests
+          ls -la 
           git branch
           pwd
 
