@@ -1,5 +1,5 @@
 # Documantation:
-
+# For each .csprof file that requried to be API tested, the workflow will run the following steps:
 
 name: Test API
 
