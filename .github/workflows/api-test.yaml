@@ -1,3 +1,6 @@
+# Documantation:
+
+
 name: Test API
 
 on:
@@ -89,6 +92,11 @@ jobs:
           path: ./API-tests
           ref: 'API-tests/AuthorizationService/1.0.0'
           token: ${{ secrets.API_TEST_TOKEN }}
+
+      - run: |
+          ls -la
+          git branch
+          pwd
 
       # - uses: actions/checkout@v3
 
