@@ -104,8 +104,8 @@ jobs:
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
-          environment: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+          collection: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
+          environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
 
       # - name: Run Postman tests
       #   uses: matt-ball/newman-action@master
