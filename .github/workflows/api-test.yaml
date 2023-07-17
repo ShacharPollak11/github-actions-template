@@ -81,23 +81,25 @@ jobs:
       - run: |
           echo "${{ matrix.service.name }}"
           echo "${{ matrix.service.version }}"
-      # - name: Checkout API-tests repo
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: brightsource-il/oases-qa # replace with your repository name
-      #     path: ./API-tests
-      #     ref: 'API-tests/AuthorizationService/1.0.0'
-      #     token: ""
-      - uses: actions/checkout@v3
 
-      # - name: Run Postman tests
-      #   uses: matt-ball/newman-action@master
-      #   with:
-      #     collection: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
-      #     environment: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+      - name: Checkout API-tests repo
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/oases-qa # replace with your repository name
+          path: ./API-tests
+          ref: 'API-tests/AuthorizationService/1.0.0'
+          token: ${{ secrets.API_TEST_TOKEN }}
+
+      # - uses: actions/checkout@v3
 
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
-          collection: ./postman_collection.json
-          environment: ./Bse.AuthService.postman_collection.json
+          collection: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
+          environment: ./API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+
+      # - name: Run Postman tests
+      #   uses: matt-ball/newman-action@master
+      #   with:
+      #     collection: ./postman_collection.json
+      #     environment: ./Bse.AuthService.postman_collection.json
