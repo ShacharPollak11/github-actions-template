@@ -16,7 +16,6 @@ jobs:
   check_csproj:
     name: check_csproj
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     permissions:
       contents: read
     outputs:
@@ -88,9 +87,9 @@ jobs:
       - name: Checkout API-tests repo
         uses: actions/checkout@v3
         with:
-          repository: brightsource-il/oases-qa # replace with your repository name
+          repository: brightsource-il/oases-qa 
           path: ./API-tests
-          ref: 'API-tests/AuthorizationService/1.0.0'
+          ref: 'API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}'
           token: ${{ secrets.API_TEST_TOKEN }}
 
       - run: |
