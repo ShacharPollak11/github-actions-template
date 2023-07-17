@@ -92,22 +92,8 @@ jobs:
           ref: 'API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}'
           token: ${{ secrets.API_TEST_TOKEN }}
 
-      - run: |
-          cd API-tests
-          ls -la 
-          git branch
-          pwd
-
-      # - uses: actions/checkout@v3
-
       - name: Run Postman tests
         uses: matt-ball/newman-action@master
         with:
           collection: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
           environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
-
-      # - name: Run Postman tests
-      #   uses: matt-ball/newman-action@master
-      #   with:
-      #     collection: ./postman_collection.json
-      #     environment: ./Bse.AuthService.postman_collection.json
