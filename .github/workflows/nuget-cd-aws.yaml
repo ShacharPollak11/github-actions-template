@@ -57,7 +57,7 @@ jobs:
       - name: csproj version bump
         uses: SiqiLu/dotnet-bump-version@master
         with:
-          version_file: "**/*.csproj"
+          version_file: ${{ matrix.path + '/*.csproj' }}
           version_overwrite: ${{ inputs.version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Pack
