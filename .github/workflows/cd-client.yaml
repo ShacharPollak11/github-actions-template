@@ -100,7 +100,7 @@ jobs:
           projects: ${{ inputs.project  }}
 
       - name: NG build
-        if:  ${{ inputs.nx }} == false
+        if:  inputs.nx == false
         working-directory: ${{ inputs.context_path }}
         run: npx ng build
       - name: "Set bucket name "
