@@ -54,6 +54,12 @@ jobs:
       - name: Restore dependencies
         run: |
           dotnet restore ${{ matrix.path }}
+      - name: csproj version bump
+        uses: SiqiLu/dotnet-bump-version@master
+        with:
+          version_file: ${{ format('{0}/*.csproj', matrix.path) }}
+          version_overwrite: ${{ inputs.version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Pack
         run: |
           cd ${{ matrix.path  }}
