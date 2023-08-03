@@ -38,8 +38,10 @@ jobs:
           readarray -t array <<< "$services_array"
           for service in ${services_array[@]}; 
           do
-            if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
-              if [ $ENVIRONMENT == 'dev' ]; then
+            if [ ! -d "helm/$ENVIRONMENT/$service" ]; 
+            then
+              if [ $ENVIRONMENT == 'dev' ]; 
+              then
                 echo "Please Merge existing PR to $ENVIRONMENT branch"
                 exit 1
               fi
