@@ -66,11 +66,11 @@ jobs:
           echo "Commit and push changes to argocd repo"
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
-          git add -A 
+          git add -A
           git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
           git push --set-upstream origin dev
-      
-      
+
+
 
       - name: sync argocd applicationset
         env:
