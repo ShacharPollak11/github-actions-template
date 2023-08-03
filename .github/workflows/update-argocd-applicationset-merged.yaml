@@ -34,7 +34,7 @@ jobs:
           SERVICES: ${{ inputs.services }}
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          services_array=$(echo "$SERVICES" | js -r '.[]')
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
           for service in ${services_array[@]};
           do
