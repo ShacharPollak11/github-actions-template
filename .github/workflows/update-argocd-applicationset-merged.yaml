@@ -36,7 +36,8 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service in ${services_array[@]}; do
+          for service in ${services_array[@]}; 
+          do
             if [ ! -d "helm/$ENVIRONMENT/$service" ]; then
               if [ $ENVIRONMENT == 'dev' ]; then
                 echo "Please Merge existing PR to $ENVIRONMENT branch"
@@ -52,7 +53,8 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service in ${services_array[@]}; do
+          for service in ${services_array[@]}; 
+          do
             echo "service: $service"
             echo "tag: $TAG"
             sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_dev.yaml
