@@ -95,10 +95,12 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
-            echo "sync argocd applicationset"
-            argocd app sync $ENVIRONMENT 
-          else
-            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
-          fi
+              aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+              kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+#          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+#          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
+#            echo "sync argocd applicationset"
+#            argocd app sync $ENVIRONMENT 
+#          else
+#            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
+#          fi
