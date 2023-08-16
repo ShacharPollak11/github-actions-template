@@ -62,7 +62,7 @@ jobs:
           echo "replace all slashes in branch name"
           echo "A new pull request was opened/updated - without a merge"
           branch_with_slashes=${{ github.head_ref }}
-          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/\//-/g')
+          branch_without_slashes=$(echo "${{ github.head_ref }}" | sed 's/[\/_]/-/g')
           argocd_branch_name=${{ github.event.repository.name }}-$branch_without_slashes
 
           echo "argocd_branch_name: $argocd_branch_name"
