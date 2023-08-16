@@ -1,4 +1,4 @@
-name: Pack & Push a Dotnet Nuget 
+name: Pack & Push a Dotnet Nuget
 
 on:
   workflow_call:
@@ -12,12 +12,11 @@ on:
         type: string
 permissions:
   contents: read
-  
+
 jobs:
   pack-push:
     name: Push and Pack a Nuget
-    runs-on: ubuntu-latest    
-    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
