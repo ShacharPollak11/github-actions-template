@@ -9,6 +9,9 @@ on:
       enable-sonar:
         required: false
         type: boolean
+      solution_file:
+        required: true
+        type: string
 
 jobs:
   nx-ci:
@@ -24,3 +27,4 @@ jobs:
     secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
+      solution_file: ${{ inputs.solution_file }}
