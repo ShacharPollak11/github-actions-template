@@ -25,22 +25,11 @@ on:
         required: false
         type: boolean
         default: true
-      enable-snyk:
-        required: false
-        type: boolean
-        default: false
       enable-sonarqube:
         required: false
         type: boolean
         default: true
-      enable-polaris:
-        required: false
-        type: boolean
-        default: true
-      enable-coverity:
-        required: false
-        type: boolean
-        default: true
+
     outputs:
       services:
         description: "The services to build"
@@ -85,7 +74,4 @@ jobs:
       enable-test: ${{ inputs.enable-test }}
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
-      enable-snyk: ${{ inputs.enable-snyk }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
-      enable-polaris: ${{inputs.enable-polaris}}
-      enable-coverity: ${{inputs.enable-coverity}}

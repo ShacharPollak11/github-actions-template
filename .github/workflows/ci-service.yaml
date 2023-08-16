@@ -36,10 +36,6 @@ on:
         required: false
         type: boolean
         default: true
-      enable-snyk:
-        required: false
-        type: boolean
-        default: true
       enable-sonarqube:
         required: false
         type: boolean
@@ -48,14 +44,6 @@ on:
         required: false
         type: boolean
         default: false
-      enable-polaris:
-        required: false
-        type: boolean
-        default: true
-      enable-coverity:
-        required: false
-        type: boolean
-        default: true
     outputs:
       run_id:
         value: ${{ jobs.build-push-ecr.outputs.run_id }}
@@ -86,14 +74,6 @@ jobs:
       solution_file: ${{ inputs.solution_file }}
       context_path: ${{ inputs.context_path }}
 
-  snyk:
-    if: ${{ inputs.enable-snyk }}
-    uses: ./.github/workflows/snyk-sast-dotnet.yaml
-    secrets: inherit
-    with:
-      solution_file: ${{ inputs.solution_file }}
-      context_path: ${{ inputs.context_path }}
-
   sonarqube:
     if: ${{ inputs.enable-sonarqube }}
     uses: ./.github/workflows/sonar-sast.yaml
@@ -113,16 +93,3 @@ jobs:
       aws_ci_account: ${{ inputs.aws_ci_account }}
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
-
-  polaris-saas:
-    if: ${{ inputs.enable-polaris }}
-    uses: ./.github/workflows/polaris-saas.yaml
-    secrets: inherit
-    # with:
-    #   solution_file: ${{ inputs.solution_file }}
-    #   context_path: ${{ inputs.context_path }}
-
-  coverity:
-    if: ${{ inputs.enable-coverity }}
-    uses: ./.github/workflows/coverity.yaml
-    secrets: inherit

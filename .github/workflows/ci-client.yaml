@@ -6,20 +6,21 @@ on:
       context_path:
         required: true
         type: string
-
-
+      enable-sonar:
+        required: false
+        type: boolean
 
 jobs:
   nx-ci:
     uses: ./.github/workflows/nx-ci.yaml
-    secrets:  inherit
+    secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
 
   sonar:
     if: ${{ inputs.enable-sonar }}
-    uses: ./.github/workflows/sonar-sast-client.yaml
+    uses: ./.github/workflows/sonar-sast.yaml
     needs: nx-ci
-    secrets:  inherit
+    secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
