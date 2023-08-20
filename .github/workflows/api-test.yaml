@@ -1,0 +1,99 @@
+# Documantation:
+# For each .csprof file that requried to be API tested, the workflow will run the following steps:
+
+name: Test API
+
+on:
+  workflow_call:
+    inputs:
+      context_path:
+        required: true
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  check_csproj:
+    name: check_csproj
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      json_mapping: ${{ steps.find_csproj.outputs.services }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Find all csproj
+        id: find_csproj
+        run: |
+
+          # define empty arrays for service names and versions
+          declare -a service_names
+          declare -a versions
+
+          # loop through each .csproj file in the current directory and its subdirectories
+          for file in $(find ${{ inputs.context_path }} -name "*.csproj")
+          do
+              # loop through each matching line in the current file
+              while IFS= read -r line
+              do
+                  # use regex to parse the service name and version
+                  if [[ $line =~ Bse\.(.*)\.Api\.Server\"\ Version=\"(.*)\" ]] ; then
+                      # append to the arrays
+                      service_names+=(${BASH_REMATCH[1]})
+                      echo "service name: ${BASH_REMATCH[1]}"
+                      # service_names+=" "
+                      versions+=(${BASH_REMATCH[2]})
+                      echo "version: ${BASH_REMATCH[2]}"
+                      # versions+=" "
+                  fi
+              done < <(grep -o '<PackageReference Include="Bse.*Api.Server" Version=".*" />' $file)
+          done
+
+          # print the arrays
+          echo "Service Names: ${service_names[@]}"
+          echo "Versions: ${versions[@]}"
+
+          # Transform the array into a JSON list of objects
+          services_json="["
+          for index in "${!service_names[@]}"; do
+              single_service_json=$(jq -n \
+                      --arg name "${service_names[index]}" \
+                      --arg version "${versions[index]}" \
+                      '{name: $name, version: $version}')
+              services_json+="$single_service_json,"
+          done
+          services_json="${services_json%?}]"
+
+          # remove newline characters
+          services_json_single_line=$(echo $services_json | tr -d '\n')
+
+          # print it out for debugging
+          echo "Single line service JSON: $services_json_single_line"
+
+          # Pass the JSON to the next job
+          echo "services=$services_json_single_line" >> $GITHUB_OUTPUT
+
+  postman_tests:
+    needs: check_csproj
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{fromJson(needs.check_csproj.outputs.json_mapping)}}
+    steps:
+      - run: |
+          echo "${{ matrix.service.name }}"
+          echo "${{ matrix.service.version }}"
+
+      - name: Checkout API-tests repo
+        uses: actions/checkout@v3
+        with:
+          repository: brightsource-il/oases-qa 
+          path: ./API-tests
+          ref: 'API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}'
+          token: ${{ secrets.API_TEST_TOKEN }}
+
+      - name: Run Postman tests
+        uses: matt-ball/newman-action@master
+        with:
+          collection: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
+          environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json

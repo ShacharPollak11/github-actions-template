@@ -39,14 +39,19 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service_name in ${services_array[@]}; do
-            if [ ! -d "helm/dev/$service_name" ]; then
-              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch"
-              exit 1
-            else
-              echo "service exists in argocd repository"
+
+          for service in ${services_array[@]};
+          do
+            if [ ! -d "helm/$ENVIRONMENT/$service" ];
+            then
+              if [ $ENVIRONMENT == 'dev' ];
+              then
+                echo "Please Merge existing PR to $ENVIRONMENT branch"
+                exit 1
+              fi
             fi
           done
+
 
       - name: Get image tag
         env:
@@ -56,10 +61,15 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
-          for service_name in ${services_array[@]}; do
+
+          for service in ${services_array[@]}; 
+          do
             echo "service: $service"
             echo "tag: $TAG"
-            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_prod.yaml
           done
 
       - name: Commit and push changes to argocd repo
@@ -67,11 +77,10 @@ jobs:
           echo "Commit and push changes to argocd repo"
           git config --global user.email argocd@brightsource-il.com && git config --global user.name ci-bot
           git fetch
-          git add -A 
+          git add -A
           git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
           git push --set-upstream origin dev
-      
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -79,16 +88,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ env.aws_region }}
 
+      - uses: clowdhaus/argo-cd-action/@main
+        with:
+            version: 2.6.7
+            command: version
+            options: --client
+
       - name: sync argocd applicationset
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-          kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+              aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+              kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+#          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+#          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
+#            echo "sync argocd applicationset"
+#            argocd app sync $ENVIRONMENT 
+#          else
+#            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
+#          fi
 
-          # if kubectl get appset $ENVIRONMENT-application-set -n argocd  &> /dev/null; then
-          #   echo "sync argocd applicationset"
-          #   argocd app sync $ENVIRONMENT-application-set -n argocd
-          # else
-          #  kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
-          # fi
