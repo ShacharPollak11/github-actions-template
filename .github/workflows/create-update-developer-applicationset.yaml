@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       tag:
-        required: true
+        required: false
         type: string
 
 env:
@@ -38,26 +38,11 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      - name: Check if service exists in argocd repository
-        env:
-          SERVICES: ${{ inputs.services }}
-        run: |
-          services_array=$(echo "$SERVICES" | jq -r '.[]')
-          readarray -t array <<< "$services_array"
-          for service_name in ${services_array[@]}; do
-            if [ ! -d "helm/dev/$service_name" ]; then
-              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch"
-              exit 1
-            else
-              echo "service exists in argocd repository"
-            fi
-          done
-
       - name: Create and update branch in argocd repo
         id: create_branch
         env:
           SERVICES: ${{ inputs.services }}
-          TAG: ${{ github.event.inputs.tag }}
+          TAG: ${{ inputs.tag }}
         run: |
           echo "replace all slashes in branch name"
           echo "A new pull request was opened/updated - without a merge"
@@ -87,12 +72,19 @@ jobs:
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
           for service_name in ${services_array[@]}; do
+            if [ ! -d "helm/dev/$service_name" ]; then
+              echo "service is not exists in argocd repository, please add helm chart for $service_name and create a PR to dev branch from the branch $argocd_branch_name"
+              exit 1
+            else
+              echo "service exists in argocd repository"
+            fi
             echo "service_name: $service_name"
             echo "tag: $TAG"
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_dev.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_qa.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_staging.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service_name/values_prod.yaml
+            if [ -z "$TAG" ]; then
+              echo "TAG is empty, using the branch name as tag"
+              TAG=$branch_without_slashes
+            fi
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service_name/values_dev.yaml
           done
 
           git add -A 

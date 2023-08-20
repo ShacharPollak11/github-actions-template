@@ -15,9 +15,10 @@ on:
 
 permissions:
   contents: read
+
 env:
   aws_region: us-east-1
-  
+
 jobs:
   update-application-set-in-argocd:
     runs-on: ubuntu-latest
@@ -38,6 +39,7 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
+
           for service in ${services_array[@]};
           do
             if [ ! -d "helm/$ENVIRONMENT/$service" ];
@@ -59,6 +61,7 @@ jobs:
         run: |
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
+
           for service in ${services_array[@]}; 
           do
             echo "service: $service"
@@ -84,7 +87,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ env.aws_region }}
-     
+
       - uses: clowdhaus/argo-cd-action/@main
         with:
             version: 2.6.7
@@ -104,3 +107,4 @@ jobs:
 #          else
 #            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
 #          fi
+

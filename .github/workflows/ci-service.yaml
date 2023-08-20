@@ -44,6 +44,7 @@ on:
         required: false
         type: boolean
         default: false
+        
     outputs:
       run_id:
         value: ${{ jobs.build-push-ecr.outputs.run_id }}
@@ -93,3 +94,4 @@ jobs:
       aws_ci_account: ${{ inputs.aws_ci_account }}
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
+

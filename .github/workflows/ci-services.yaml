@@ -75,3 +75,4 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
+
