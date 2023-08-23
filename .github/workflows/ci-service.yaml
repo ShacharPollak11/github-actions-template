@@ -87,7 +87,7 @@ jobs:
     # if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
     uses: ./.github/workflows/build-and-push-ecr.yaml
     secrets: inherit
-    needs: test
+    # needs: test
     with:
       context_path: ${{ inputs.context_path }}
       aws_ci_region: ${{ inputs.aws_ci_region }}
