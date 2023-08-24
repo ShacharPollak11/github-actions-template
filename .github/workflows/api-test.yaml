@@ -9,6 +9,13 @@ on:
       context_path:
         required: true
         type: string
+      service_name:
+        required: true
+        type: string
+      envairoment:
+        required: false
+        type: string
+        default: "dev"
 permissions:
   contents: read
 
@@ -96,4 +103,4 @@ jobs:
         uses: matt-ball/newman-action@master
         with:
           collection: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
-          environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+          envVar: '[{ "key": "baseUrl", "value": "${{ inputs.service_name }}.${{ inputs.envairoment }}.brightsourceenergy.net" }]'

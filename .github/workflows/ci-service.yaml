@@ -66,6 +66,8 @@ jobs:
     secrets: inherit
     with:
       context_path: ${{ inputs.context_path }}
+      service_name: ${{ inputs.service_name }}
+      
 
   resharper:
     if: ${{ inputs.enable-resharper }}
