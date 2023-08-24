@@ -37,20 +37,20 @@ jobs:
           SERVICES: ${{ inputs.services }}
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          # services_array=$(echo "$SERVICES" | jq -r '.[]')
-          # readarray -t array <<< "$services_array"
+          services_array=$(echo "$SERVICES" | jq -r '.[]')
+          readarray -t array <<< "$services_array"
 
-          # for service in ${services_array[@]};
-          # do
-          #   if [ ! -d "helm/$ENVIRONMENT/$service" ];
-          #   then
-          #     if [ $ENVIRONMENT == 'dev' ];
-          #     then
-          #       echo "Please Merge existing PR to $ENVIRONMENT branch"
-          #       exit 1
-          #     fi
-          #   fi
-          # done
+          for service in ${services_array[@]};
+          do
+            if [ ! -d "helm/$ENVIRONMENT/$service" ];
+            then
+              if [ $ENVIRONMENT == 'dev' ];
+              then
+                echo "Please Merge existing PR to $ENVIRONMENT branch"
+                exit 1
+              fi
+            fi
+          done
 
 
       - name: Get image tag
