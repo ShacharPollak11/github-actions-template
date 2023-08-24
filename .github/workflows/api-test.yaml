@@ -96,4 +96,5 @@ jobs:
         uses: matt-ball/newman-action@master
         with:
           collection: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_collection.json
-          environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+          # environment: ./API-tests/API-tests/${{ matrix.service.name }}/${{ matrix.service.version }}/${{ matrix.service.name }}.postman_environment.json
+          envVar: '[{ "key": "url", "value": "http://localhost:3000" }]'
