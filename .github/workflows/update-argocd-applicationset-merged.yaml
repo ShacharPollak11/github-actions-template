@@ -5,7 +5,7 @@ on:
     inputs:
       services:
         required: true
-        type: string
+        type: string # Example: '["auth"]'
       environment:
         required: true
         type: string
@@ -66,10 +66,10 @@ jobs:
           do
             echo "service: $service"
             echo "tag: $TAG"
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_dev.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_qa.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_staging.yaml
-            sed -i "s,tag:.*,tag:\ $TAG," helm/dev/$service/values_prod.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service/values_dev.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service/values_qa.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service/values_staging.yaml
+            sed -i "s,tag:.*,tag:\ '$TAG'," helm/dev/$service/values_prod.yaml
           done
 
       - name: Commit and push changes to argocd repo
