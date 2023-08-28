@@ -22,7 +22,7 @@ permissions:
 jobs:
   check_csproj:
     name: check_csproj
-    runs-on: self-hosteds
+    runs-on: self-hosted
     permissions:
       contents: read
     outputs:
