@@ -100,10 +100,7 @@ jobs:
       context_path: ${{ matrix.array.context_path }}
       dockerfile_path: ${{ matrix.array.dockerfile_path }}
       service_name: ${{ matrix.array.service_name }}
-      enable_api_tests: ${{ matrix.array.enable_api_tests }}
-      enable-test: ${{ inputs.enable-test }}
       enable-ecr: ${{ inputs.enable-ecr }}
-      enable-resharper: ${{ inputs.enable-resharper }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       test-file-path: ${{ inputs.test-file-path }}
 
