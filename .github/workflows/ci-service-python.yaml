@@ -1,0 +1,73 @@
+name: CI service Python
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: "3.9"
+      requirements-path:
+        required: false
+        type: string
+      setup-config-path:
+        required: false
+        type: string
+      test-file-path:
+        required: true
+        type: string
+      context_path:
+        required: true
+        type: string
+      service_name:
+        required: true
+        type: string
+      dockerfile_path:
+        required: true
+        type: string
+      aws_ci_region:
+        type: string
+        default: "us-east-1"
+      aws_ci_account:
+        type: string
+        default: "479886561928"
+      enable-sonarqube:
+        required: false
+        type: boolean
+        default: true
+      enable-ecr:
+        required: false
+        type: boolean
+        default: false
+
+    outputs:
+        run_id:
+            value: ${{ jobs.build-push-ecr.outputs.run_id }}
+
+jobs:
+  test:
+    uses: ./.github/workflows/python-unit-test.yaml
+    secrets: inherit
+    with:
+      python-version: ${{ inputs.python-version }}
+      requirements-path: ${{ inputs.requirements-path }}
+      test-file-path: ${{ inputs.test-file-path }}
+      setup-config-path: ${{ inputs.setup-config-path }}
+
+  sonarqube:
+    if: ${{ inputs.enable-sonarqube }}
+    uses: ./.github/workflows/sonar-sast.yaml
+    secrets: inherit
+    with:
+      context_path: ${{ inputs.context_path }}
+    
+  build-push-ecr:
+    # if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
+    uses: ./.github/workflows/build-and-push-ecr.yaml
+    secrets: inherit
+    with:
+        context_path: ${{ inputs.context_path }}
+        aws_ci_region: ${{ inputs.aws_ci_region }}
+        aws_ci_account: ${{ inputs.aws_ci_account }}
+        service_name: ${{ inputs.service_name }}
+        dockerfile_path: ${{ inputs.dockerfile_path }}
