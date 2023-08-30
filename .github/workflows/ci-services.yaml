@@ -103,4 +103,11 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       test-file-path: ${{ inputs.test-file-path }}
-
+      
+  ci-service-default:
+    if: ${{ inputs.service_type != 'csharp' && inputs.service_type != 'python' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail Pipeline
+        run: |
+         echo "Invalid service_type provided: ${{ inputs.service_type }} only 'cshapr' or 'python'"; exit 1
