@@ -1,4 +1,4 @@
-name: CI service
+name: CI service C#
 
 on:
   workflow_call:
