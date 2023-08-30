@@ -39,7 +39,8 @@ on:
 
 jobs:
   read-json:
-    runs-on: self-hosted
+    # runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
