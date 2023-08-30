@@ -87,7 +87,6 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
-      enable_api_tests: ${{ inputs.enable_api_tests }}
 
   ci-service-python:
     if : ${{ inputs.service_type == 'python' }}
