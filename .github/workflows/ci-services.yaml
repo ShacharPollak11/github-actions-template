@@ -21,6 +21,10 @@ on:
         required: false
         type: boolean
         default: false
+      enable_api_tests:
+        required: false
+        type: boolean
+        default: false
       enable-ecr:
         required: false
         type: boolean
@@ -83,6 +87,7 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
+      enable_api_tests: ${{ inputs.enable_api_tests }}
 
   ci-service-python:
     if : ${{ inputs.service_type == 'python' }}
