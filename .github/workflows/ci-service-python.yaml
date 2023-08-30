@@ -50,7 +50,7 @@ jobs:
     secrets: inherit
     with:
       python-version: ${{ inputs.python-version }}
-      requirements-path: ${{ inputs.requirements-path }}
+      requirements-path: ${{ inputs. requirements-path }}
       test-file-path: ${{ inputs.test-file-path }}
       setup-config-path: ${{ inputs.setup-config-path }}
 

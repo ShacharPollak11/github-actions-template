@@ -1,4 +1,4 @@
-name: CI service
+run-name: CI service ${{ inputs.service_type }}
 
 on:
   workflow_call:
@@ -29,13 +29,19 @@ on:
         required: false
         type: boolean
         default: true
+      service_type:
+        required: true
+        type: string
+      test-file-path:
+        required: false
+        type: string
 
     outputs:
       services:
         description: "The services to build"
         value: ${{ jobs.read-json.outputs.services }}
       run_id:
-        value: ${{ jobs.ci-service.outputs.run_id }}
+        value: ${{ jobs.ci-service-csharp.outputs.run_id }}
 
 jobs:
   read-json:
@@ -55,7 +61,8 @@ jobs:
     outputs:
       services: ${{ steps.services.outputs.services }}
 
-  ci-service:
+  ci-service-csharp:
+    if : ${{ inputs.service_type == 'csharp' }}
     needs: read-json
     permissions:
       contents: read
@@ -63,7 +70,7 @@ jobs:
       fail-fast: false
       matrix:
         array: ${{ fromJson(needs.read-json.outputs.services) }}
-    uses: ./.github/workflows/ci-service.yaml
+    uses: ./.github/workflows/ci-service-csharp.yaml
     secrets: inherit
     name: CI for ${{ matrix.array.service_name }}
     with:
@@ -76,4 +83,27 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-resharper: ${{ inputs.enable-resharper }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
+
+  ci-service-python:
+    if : ${{ inputs.service_type == 'python' }}
+    needs: read-json
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        array: ${{ fromJson(needs.read-json.outputs.services) }}
+    uses: ./.github/workflows/ci-service-python.yaml
+    secrets: inherit
+    name: CI for ${{ matrix.array.service_name }}
+    with:
+      context_path: ${{ matrix.array.context_path }}
+      dockerfile_path: ${{ matrix.array.dockerfile_path }}
+      service_name: ${{ matrix.array.service_name }}
+      enable_api_tests: ${{ matrix.array.enable_api_tests }}
+      enable-test: ${{ inputs.enable-test }}
+      enable-ecr: ${{ inputs.enable-ecr }}
+      enable-resharper: ${{ inputs.enable-resharper }}
+      enable-sonarqube: ${{ inputs.enable-sonarqube }}
+      test-file-path: ${{ inputs.test-file-path }}
 
