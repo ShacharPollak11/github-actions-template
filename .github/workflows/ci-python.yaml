@@ -25,5 +25,5 @@ jobs:
     with:
       python-version: ${{ inputs.python-version }}
       requirements-path: ${{ inputs.requirements-path }}
-      test-path: ${{ inputs.test-path }}
+      test-file-path: ${{ inputs.test-path }}
       setup-config-path: ${{ inputs.setup-config-path }}
