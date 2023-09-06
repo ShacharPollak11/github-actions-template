@@ -31,6 +31,10 @@ on:
       aws_ci_account:
         type: string
         default: "479886561928"
+      enable-test:
+        required: false
+        type: boolean
+        default: true
       enable-sonarqube:
         required: false
         type: boolean
@@ -46,6 +50,7 @@ on:
 
 jobs:
   test:
+    if: ${{ inputs.enable-test }}
     uses: ./.github/workflows/python-unit-test.yaml
     secrets: inherit
     with:
