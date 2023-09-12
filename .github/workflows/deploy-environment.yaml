@@ -81,5 +81,5 @@ jobs:
 
       - name: Sync ArgoCD ApplicationSet
         run: |
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name dev-brightsource
           kubectl apply -f ./applicationSets/apply-${{ inputs.destination }}-env.yaml -n argocd
