@@ -10,10 +10,7 @@ on:
       services:
         required: true
         type: string
-      services:
-        required: true
-        type: string
-  
+
 permissions:
   contents: read
 
@@ -38,7 +35,7 @@ jobs:
           ssh-key: ${{ secrets.ARGOCD_DEPLOY_KEY }}
           ref: dev
           fetch-depth: 0
-      
+
       - name: Check if service folder exists in $DESTINATION
         id: check_service_folder
         if: ${{ inputs.destination }} != 'dev'
@@ -72,7 +69,7 @@ jobs:
               cp -f helm/$SOURCE/$service/values_$SOURCE.yaml helm/$DESTINATION/$service/values_$DESTINATION.yaml
             done      
           fi
-      
+
       - name: Commit and push changes to argocd repo
         run: |
           echo "Commit and push changes to argocd repo"
@@ -86,6 +83,3 @@ jobs:
         run: |
           aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
           kubectl apply -f ./applicationSets/apply-${{ inputs.destination }}-env.yaml -n argocd
-
-
-
