@@ -107,6 +107,8 @@ jobs:
       enable-ecr: ${{ inputs.enable-ecr }}
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       test-file-path: ${{ inputs.test-file-path }}
+      enable-test: ${{ inputs.enable-test }}
+
       
   ci-service-default:
     if: ${{ inputs.service_type != 'csharp' && inputs.service_type != 'python' }}
