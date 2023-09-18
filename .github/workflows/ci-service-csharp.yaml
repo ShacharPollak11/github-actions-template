@@ -86,7 +86,7 @@ jobs:
 
   build-push-ecr:
     # if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( needs.test.result == 'success' && inputs.enable-ecr ))
-    if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( 'success' && inputs.enable-ecr ))
+    # if: (( inputs.enable-ecr && inputs.enable-test == false && always() ) || ( 'success' && inputs.enable-ecr ))
     uses: ./.github/workflows/build-and-push-ecr.yaml
     secrets: inherit
     # needs: test
