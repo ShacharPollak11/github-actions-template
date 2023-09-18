@@ -52,7 +52,8 @@ jobs:
     # runs-on: self-hosted
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
     steps:
       - uses: actions/checkout@v3
       - id: services
@@ -66,7 +67,7 @@ jobs:
       services: ${{ steps.services.outputs.services }}
 
   ci-service-csharp:
-    if : ${{ inputs.service_type == 'csharp' }}
+    if: ${{ inputs.service_type == 'csharp' }}
     needs: read-json
     permissions:
       contents: read
@@ -89,7 +90,7 @@ jobs:
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
 
   ci-service-python:
-    if : ${{ inputs.service_type == 'python' }}
+    if: ${{ inputs.service_type == 'python' }}
     needs: read-json
     permissions:
       contents: read
@@ -109,11 +110,10 @@ jobs:
       test-file-path: ${{ inputs.test-file-path }}
       enable-test: ${{ inputs.enable-test }}
 
-      
   ci-service-default:
     if: ${{ inputs.service_type != 'csharp' && inputs.service_type != 'python' }}
     runs-on: ubuntu-latest
     steps:
       - name: Fail Pipeline
         run: |
-         echo "Invalid service_type provided: ${{ inputs.service_type }} only 'cshapr' or 'python'"; exit 1
+          echo "Invalid service_type provided: ${{ inputs.service_type }} only 'cshapr' or 'python'"; exit 1
