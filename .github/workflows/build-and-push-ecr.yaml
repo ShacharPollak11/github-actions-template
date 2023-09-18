@@ -49,7 +49,7 @@ jobs:
       - name: Configure AWS Credentials "DEV"
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ARN_ROLE_OIDC }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
       - name: Repository check/creation
