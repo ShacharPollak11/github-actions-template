@@ -1,4 +1,4 @@
-name: CI service
+name: Build and push to ECR
 
 on:
   workflow_call:
