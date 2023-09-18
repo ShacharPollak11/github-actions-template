@@ -14,7 +14,8 @@ on:
         type: string
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
   aws_region: us-east-1
@@ -52,7 +53,6 @@ jobs:
             fi
           done
 
-
       - name: Get image tag
         env:
           SERVICES: ${{ inputs.services }}
@@ -81,29 +81,29 @@ jobs:
           git diff-index --quiet HEAD || git commit -m "Updated $ENVIRONMENT application set with new tag"
           git push --set-upstream origin dev
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ env.aws_region }}
 
       - uses: clowdhaus/argo-cd-action/@main
         with:
-            version: 2.6.7
-            command: version
-            options: --client
+          version: 2.6.7
+          command: version
+          options: --client
 
       - name: sync argocd applicationset
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-              aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-              kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
+
 #          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
 #          if kubectl get appset $ENVIRONMENT -n argocd  &> /dev/null; then
 #            echo "sync argocd applicationset"
-#            argocd app sync $ENVIRONMENT 
+#            argocd app sync $ENVIRONMENT
 #          else
 #            kubectl apply -f ./applicationSets/dev/apply-dev-env.yaml -n argocd
 #          fi

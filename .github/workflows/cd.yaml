@@ -1,9 +1,9 @@
-name: 'CD'
+name: "CD"
 
 on:
   workflow_call:
     inputs:
-      env: 
+      env:
         required: true
         type: string
         default: dev
@@ -18,17 +18,16 @@ on:
         type: string
       default_bucket_region:
         type: string
-        default: 'us-east-1'
-
+        default: "us-east-1"
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
-  cluster_name:  eks-${{ inputs.env }}-${{ inputs.region }}
+  cluster_name: dev-brightsource
   charts_bucket: s3-charts-dev-us-east-1
   client_bucket: s3-client-dev-us-east-1
-
 
 jobs:
   cd:
@@ -37,10 +36,9 @@ jobs:
     steps:
       - name: Configure AWS Credentials "DEV"
         if: ${{ inputs.env != 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.region }}
 
       - name: Configure AWS Credentials "PROD"
@@ -53,72 +51,72 @@ jobs:
 
       - name: Download Helm chart
         run: |
-             set -Eeuo pipefail
-             function getKey() {
-               aws s3api list-objects --bucket $1 | \
-               jq -e --arg branch $2 \
-               '. as $parent | [.Contents[].Key | split("/")[1] | select(test($branch+".zip")) | split("-")[0] | tonumber] 
-               | max | tostring | . as $buildId |
-               $parent.Contents[].Key | select(test($buildId+"-"))' | sed 's/"//g'
-             }
+          set -Eeuo pipefail
+          function getKey() {
+            aws s3api list-objects --bucket $1 | \
+            jq -e --arg branch $2 \
+            '. as $parent | [.Contents[].Key | split("/")[1] | select(test($branch+".zip")) | split("-")[0] | tonumber] 
+            | max | tostring | . as $buildId |
+            $parent.Contents[].Key | select(test($buildId+"-"))' | sed 's/"//g'
+          }
 
-             chart_key=$(getKey ${{ env.charts_bucket }} ${{ inputs.branch }})
-             echo "Key: $chart_key"
+          chart_key=$(getKey ${{ env.charts_bucket }} ${{ inputs.branch }})
+          echo "Key: $chart_key"
 
-             aws s3api get-object --bucket ${{ env.charts_bucket }} \
-             --key $chart_key chart.zip
+          aws s3api get-object --bucket ${{ env.charts_bucket }} \
+          --key $chart_key chart.zip
 
-             unzip chart.zip
+          unzip chart.zip
 
       - name: Update kube config
         run: aws eks --region ${{ inputs.region }} update-kubeconfig --name ${{ env.cluster_name }}
 
       - name: Deploy helm chart
         run: |
-             if [ -f helm/umbrella/values_${{ inputs.env }}.yaml ]; then
-               envfile="-f helm/umbrella/values_${{ inputs.env }}.yaml"
-             else
-               envfile=""
-             fi
-             helm dependency build helm/umbrella
-             helm upgrade bse-${{ inputs.env }} helm/umbrella \
-             --namespace ${{ inputs.env }} \
-             --install \
-             --atomic \
-             --create-namespace \
-             --dependency-update \
-             --wait \
-             -f helm/umbrella/common.yaml $envfile \
-             -f helm/umbrella/versions.yaml
+          if [ -f helm/umbrella/values_${{ inputs.env }}.yaml ]; then
+            envfile="-f helm/umbrella/values_${{ inputs.env }}.yaml"
+          else
+            envfile=""
+          fi
+          helm dependency build helm/umbrella
+          helm upgrade bse-${{ inputs.env }} helm/umbrella \
+          --namespace ${{ inputs.env }} \
+          --install \
+          --atomic \
+          --create-namespace \
+          --dependency-update \
+          --wait \
+          -f helm/umbrella/common.yaml $envfile \
+          -f helm/umbrella/versions.yaml
 
       - name: Download client
         run: |
-             set -Eeuo pipefail
-             function getKey() {
-               aws s3api list-objects --bucket $1 | \
-               jq -e --arg branch $2 \
-               '. as $parent | [.Contents[].Key | split("/")[1] | select(test($branch+".zip")) | split("-")[0] | tonumber] 
-               | max | tostring | . as $buildId |
-               $parent.Contents[].Key | select(test($buildId+"-"))' | sed 's/"//g'
-             }
+          set -Eeuo pipefail
+          function getKey() {
+            aws s3api list-objects --bucket $1 | \
+            jq -e --arg branch $2 \
+            '. as $parent | [.Contents[].Key | split("/")[1] | select(test($branch+".zip")) | split("-")[0] | tonumber] 
+            | max | tostring | . as $buildId |
+            $parent.Contents[].Key | select(test($buildId+"-"))' | sed 's/"//g'
+          }
 
-             client_key=$(getKey ${{ env.client_bucket }} ${{ inputs.branch }} || getKey ${{ env.client_bucket }} dev)
-             echo "Key: $client_key"
+          client_key=$(getKey ${{ env.client_bucket }} ${{ inputs.branch }} || getKey ${{ env.client_bucket }} dev)
+          echo "Key: $client_key"
 
-             aws s3api get-object --bucket ${{ env.client_bucket }} \
-             --key $client_key client.zip
+          aws s3api get-object --bucket ${{ env.client_bucket }} \
+          --key $client_key client.zip
 
-             unzip client.zip
+          unzip client.zip
 
       - name: Deploy client
         run: |
-             cat << EOF > dist/assets/config.json
-             { 
-                 "environment":{
-                     "baseUrl": "http://bff.${{ inputs.env }}.brightsourceenergy.net"
-                 }
-             }
-             EOF
+          cat << EOF > dist/assets/config.json
+          { 
+              "environment":{
+                  "baseUrl": "http://bff.${{ inputs.env }}.brightsourceenergy.net"
+              }
+          }
+          EOF
 
-             app_bucket=$(aws s3api list-buckets | jq -e '.Buckets[].Name | select(test("s3-app-${{ inputs.env }}-${{ inputs.region }}"))' | sed 's/"//g')
-             aws s3 cp ./dist s3://$app_bucket/dist --recursive
+          app_bucket=$(aws s3api list-buckets | jq -e '.Buckets[].Name | select(test("s3-app-${{ inputs.env }}-${{ inputs.region }}"))' | sed 's/"//g')
+          aws s3 cp ./dist s3://$app_bucket/dist --recursive
