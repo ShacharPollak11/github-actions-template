@@ -27,7 +27,8 @@ on:
         value: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
   repository: dkr.ecr.${{ inputs.aws_ci_region }}.amazonaws.com/${{ inputs.service_name }}
