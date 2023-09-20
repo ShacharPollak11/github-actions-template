@@ -101,9 +101,9 @@ jobs:
         id: set_tags
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "::set-output name=tags::${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}"
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=tags::${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}"
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}" >> $GITHUB_OUTPUT
           fi
           echo $tags
             
