@@ -44,13 +44,14 @@ on:
         required: false
         type: boolean
         default: false
-        
+
     outputs:
       run_id:
         value: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 jobs:
   test:
@@ -67,7 +68,6 @@ jobs:
     with:
       context_path: ${{ inputs.context_path }}
       service_name: ${{ inputs.service_name }}
-      
 
   resharper:
     if: ${{ inputs.enable-resharper }}
@@ -97,4 +97,3 @@ jobs:
       aws_ci_account: ${{ inputs.aws_ci_account }}
       service_name: ${{ inputs.service_name }}
       dockerfile_path: ${{ inputs.dockerfile_path }}
-
