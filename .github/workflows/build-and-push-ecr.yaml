@@ -96,16 +96,28 @@ jobs:
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
             echo "short_sha=$short_sha" >> $GITHUB_OUTPUT
+
+      - name: Set Docker Tags
+        id: set_tags
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}" >> $GITHUB_OUTPUT
+          fi
+          echo $tags
+
+      - name: echo
+        id: echo
+        run: |
+          echo  ${{ steps.set_tags.outputs.tags }}
             
       - name: Docker build and push
         uses: docker/build-push-action@v4
         with:
           context: ${{ inputs.context_path }}
           push: true
-          tags: 
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}
+          tags: ${{ steps.set_tags.outputs.tags }}
           file: ${{ inputs.dockerfile_path }} 
           build-args: |
             "BSII_NUGET_URL=${{ secrets.BSII_NUGET_URL }}"
