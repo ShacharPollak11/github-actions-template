@@ -57,8 +57,14 @@ jobs:
         env:
           SERVICES: ${{ inputs.services }}
           ENVIRONMENT: ${{ inputs.environment }}
-          TAG: ${{ inputs.tag }}
         run: |
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            TAG=$( echo '${{ github.head_ref }}' | tr '/' '-' )
+          else
+            TAG=${{ inputs.tag }}
+          fi
+          
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
 
