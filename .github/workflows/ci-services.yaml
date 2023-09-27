@@ -58,7 +58,11 @@ jobs:
       - uses: actions/checkout@v3
       - id: services
         run: |
-          content=`cat ${{inputs.projects_args}}`
+          if [[ "${{ inputs.projects_args }}" == *.json ]]; then
+            content=$(cat ${{inputs.projects_args}})
+          else
+            content="${{ inputs.projects_args }}"
+          fi
           echo "services<<EOF" >> $GITHUB_OUTPUT
           echo "$content" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
