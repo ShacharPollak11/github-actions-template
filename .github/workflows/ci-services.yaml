@@ -95,7 +95,7 @@ jobs:
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
 
   ci-service-python:
-    if: ${{ inputs.service_type == 'python' }}
+    if: ${{ inputs.service_type == 'python' && needs.read-json.outputs.services != []}}
     needs: read-json
     permissions:
       id-token: write # This is required for requesting the JWT
