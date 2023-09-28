@@ -4,24 +4,24 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
-  aws_region:  us-east-1
+  aws_region: us-east-1
 
 jobs:
   install_airflow:
     runs-on: ubuntu-latest
     name: install airflow
     steps:
-      - name: List environment variables 
+      - name: List environment variables
         run: env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ env.aws_region }}
 
       - name: Checkout argocd
@@ -32,21 +32,21 @@ jobs:
 
       - name: helm install airflow
         run: |
-            aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-            helm repo add apache-airflow https://airflow.apache.org
-            
-            branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-            namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name dev-brightsource
+          helm repo add apache-airflow https://airflow.apache.org
 
-            cat << EOT >> ./helm/utility/airflow/generic_values.yaml
-            ingress:
-              web:
-                annotations: {
-                  external-dns.alpha.kubernetes.io/hostname: $namespace.dev.brightsourceenergy.net,
-                  nginx.ingress.kubernetes.io/force-ssl-redirect: 'true',
-                  nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-                  }
-                hosts: [$namespace.dev.brightsourceenergy.net]
-            EOT
+          branch_without_slashes=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
 
-            helm upgrade --install airflow apache-airflow/airflow --namespace $namespace --create-namespace -f ./helm/utility/airflow/values.yaml -f ./helm/utility/airflow/generic_values.yaml
+          cat << EOT >> ./helm/utility/airflow/generic_values.yaml
+          ingress:
+            web:
+              annotations: {
+                external-dns.alpha.kubernetes.io/hostname: $namespace.dev.brightsourceenergy.net,
+                nginx.ingress.kubernetes.io/force-ssl-redirect: 'true',
+                nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+                }
+              hosts: [$namespace.dev.brightsourceenergy.net]
+          EOT
+
+          helm upgrade --install airflow apache-airflow/airflow --namespace $namespace --create-namespace -f ./helm/utility/airflow/values.yaml -f ./helm/utility/airflow/generic_values.yaml

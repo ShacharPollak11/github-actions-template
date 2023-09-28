@@ -18,37 +18,37 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     permissions:
-      contents: read
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
       - uses: actions/setup-node@v3
         with:
-          node-version:  ${{ inputs.node_version }}
-          cache: 'npm'
+          node-version: ${{ inputs.node_version }}
+          cache: "npm"
           cache-dependency-path: ${{format('{0}/{1}',inputs.context_path,'package-lock.json')}}
-          
+
       - name: Cache NPM dependencies
         uses: actions/cache@v3
         id: cache-primes
         with:
           path: ${{format('{0}/{1}',inputs.context_path,'node_modules')}}
           key: ${{ runner.os }}-npm-v3-${{ hashFiles(format('{0}/{1}',inputs.context_path,'package-lock.json')) }}
-          
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+
+      - name: Configure AWS credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
       - name: login aws codeartifact npm registry
         run: aws codeartifact login --tool npm --repository artifactory --domain brightsource --domain-owner 479886561928 --region us-east-1
         working-directory: ${{ inputs.context_path }}
-      
+
       - name: Install Dependencies
         if: steps.cache-primes.outputs.cache-hit != 'true'
         run: npm install
@@ -58,4 +58,3 @@ jobs:
         with:
           targets: lint,test,build
           workingDirectory: ${{ inputs.context_path }}
-

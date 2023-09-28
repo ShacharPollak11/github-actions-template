@@ -17,7 +17,8 @@ jobs:
     name: Service unit tests
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET
@@ -27,8 +28,7 @@ jobs:
       - name: Configure AWS Credentials "DEV"
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
       - name: Restore dependencies

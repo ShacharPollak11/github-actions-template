@@ -4,10 +4,11 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
 
 env:
-  aws_region:  us-east-1
+  aws_region: us-east-1
 
 jobs:
   delete_airflow:
@@ -15,14 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     name: delete airflow
     steps:
-      - name: List environment variables 
+      - name: List environment variables
         run: env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ env.aws_region }}
 
       - name: Checkout argocd
@@ -33,14 +33,14 @@ jobs:
 
       - name: helm uninstall airflow
         run: |
-            aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
-            
-            branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
-            namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
-            
-            helm uninstall airflow --namespace $namespace
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
 
-            if kubectl get namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
-            then 
-              kubectl delete namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes; 
-            fi
+          branch_without_slashes=$(echo "${{ github.event.ref }}" | sed 's/\//-/g')
+          namespace="airflow-${{ github.event.repository.name }}-$branch_without_slashes"
+
+          helm uninstall airflow --namespace $namespace
+
+          if kubectl get namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes &> /dev/null; 
+          then 
+            kubectl delete namespace airflow-${{ github.event.repository.name }}-$branch_without_slashes; 
+          fi

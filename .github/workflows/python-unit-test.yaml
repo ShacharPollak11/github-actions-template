@@ -20,6 +20,10 @@ on:
         type: string
         default: "us-east-1"
 
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,12 +33,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
-          
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+
+      - name: Configure AWS credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_MODLECSI }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_ID_MODLECSI }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
       - name: Display Python version

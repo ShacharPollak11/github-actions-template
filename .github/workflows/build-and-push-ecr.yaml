@@ -1,4 +1,4 @@
-name: CI service
+name: Build and push to ECR
 
 on:
   workflow_call:
@@ -22,16 +22,17 @@ on:
         type: string
         default: "479886561928.dkr.ecr.us-east-1.amazonaws.com"
     outputs:
-      run_id: 
+      run_id:
         description: "The run id of the build-push-ecr job"
         value: ${{ jobs.build-push-ecr.outputs.run_id }}
 
 permissions:
-  contents: read
-  
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
 env:
   repository: dkr.ecr.${{ inputs.aws_ci_region }}.amazonaws.com/${{ inputs.service_name }}
-  
+
 jobs:
   build-push-ecr:
     runs-on: ubuntu-latest
@@ -45,11 +46,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS Credentials "DEV"
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          role-to-assume: ${{ secrets.ARN_ROLE_OIDC_ADMINISTRATOR_DEV }}
           aws-region: ${{ inputs.aws_ci_region }}
 
       - name: Repository check/creation
@@ -70,13 +70,13 @@ jobs:
           aws ecr set-repository-policy \
             --repository-name ${{ inputs.service_name }} \
             --policy-text file://ecr-multi-account.json
-            
+
       - name: Login to ECR
         uses: docker/login-action@v2.0.0
         with:
           registry: ${{ inputs.ecr_registry }}/${{ inputs.service_name }}
-          username: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          # username: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}    #don't need it, because the login happens in the step above
+          # password: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }} #don't need it, because the login happens in the step above
           ecr: true
           logout: true
 
@@ -92,21 +92,34 @@ jobs:
           fi
 
       - name: Calc Short SHA
-        id: short_sha 
+        id: short_sha
         run: |
             short_sha=$(git rev-parse --short "$GITHUB_SHA")
             echo "short_sha=$short_sha" >> $GITHUB_OUTPUT
+
+      - name: Set Docker Tags
+        id: set_tags
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}" >> $GITHUB_OUTPUT
+          fi
+          echo $tags
+
+      - name: echo
+        id: echo
+        run: |
+          echo  ${{ steps.set_tags.outputs.tags }}
             
       - name: Docker build and push
         uses: docker/build-push-action@v4
         with:
           context: ${{ inputs.context_path }}
           push: true
-          tags: 
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.short_sha.outputs.short_sha }},
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ steps.branch_name.outputs.branch_name }},
-                ${{ inputs.aws_ci_account }}.${{ env.repository }}:${{ github.run_id }}
+          tags: ${{ steps.set_tags.outputs.tags }}
           file: ${{ inputs.dockerfile_path }} 
+
           build-args: |
             "BSII_NUGET_URL=${{ secrets.BSII_NUGET_URL }}"
             "BSII_NUGET_USER=${{ secrets.BSII_NUGET_USER }}"
