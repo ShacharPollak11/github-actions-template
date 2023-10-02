@@ -71,7 +71,7 @@ jobs:
       services: ${{ steps.services.outputs.services }}
 
   ci-service-csharp:
-    if: ${{ inputs.service_type == 'csharp' && needs.read-json.outputs.services != '[]'}}
+    if: ${{ inputs.service_type == 'csharp' }}
     needs: read-json
     permissions:
       id-token: write # This is required for requesting the JWT
