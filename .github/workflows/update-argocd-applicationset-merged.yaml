@@ -64,7 +64,7 @@ jobs:
           else
             TAG=${{ inputs.tag }}
           fi
-          
+
           services_array=$(echo "$SERVICES" | jq -r '.[]')
           readarray -t array <<< "$services_array"
 
@@ -103,7 +103,7 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
+          aws eks --region ${{ env.aws_region }} update-kubeconfig --name dev-brightsource
           kubectl apply -f ./applicationSets/apply-dev-env.yaml -n argocd
 
 #          aws eks --region ${{ env.aws_region }} update-kubeconfig --name eks-dev-${{ env.aws_region }}
