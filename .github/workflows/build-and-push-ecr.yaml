@@ -127,6 +127,7 @@ jobs:
             "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_DEV }}"
             "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}"
             "AWS_DEFAULT_REGION=${{ inputs.aws_ci_region }}"
+            "SERVICE_NAME=${{ inputs.service_name }}"
 
       - name: Output run id
         id: output_run_id
