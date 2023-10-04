@@ -43,6 +43,10 @@ on:
         required: false
         type: boolean
         default: false
+      localstack-docker-compose:
+        required: false
+        type: string
+        default: ""
 
     outputs:
       run_id:
@@ -62,6 +66,7 @@ jobs:
       requirements-path: ${{ inputs. requirements-path }}
       test-file-path: ${{ inputs.test-file-path }}
       setup-config-path: ${{ inputs.setup-config-path }}
+      localstack-docker-compose: ${{ inputs.localstack-docker-compose }}
 
   sonarqube:
     if: ${{ inputs.enable-sonarqube }}

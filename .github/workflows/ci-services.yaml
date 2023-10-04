@@ -39,6 +39,10 @@ on:
       test-file-path:
         required: false
         type: string
+      localstack-docker-compose:
+          required: false
+          type: string
+          default: ""
 
     outputs:
       services:
@@ -115,6 +119,7 @@ jobs:
       enable-sonarqube: ${{ inputs.enable-sonarqube }}
       test-file-path: ${{ inputs.test-file-path }}
       enable-test: ${{ inputs.enable-test }}
+      localstack-docker-compose: ${{ inputs.localstack-docker-compose }}
 
   ci-service-default:
     if: ${{ inputs.service_type != 'csharp' && inputs.service_type != 'python' }}
