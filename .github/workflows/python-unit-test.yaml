@@ -69,7 +69,7 @@ jobs:
       - name: Setup LocalStack
         if: "${{ inputs.localstack-docker-compose != '' }}"
         run: |
-          docker-compose -f ${{ inputs.localstack-docker-compose }} up -d
+          docker-compose -f $NORMALIZED_COMPOSE_PATH up -d
           pip install awscli-local
           while ! awslocal s3api list-buckets ; do
               echo "Waiting for LocalStack to be ready..."
