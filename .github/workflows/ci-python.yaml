@@ -17,6 +17,10 @@ on:
         required: false
         type: string
         default: "./Python/bsii_cloud/bsii_cloud_storage/storage_tests/s3-wrapper_test.py"
+      localstack-docker-compose:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   test:
@@ -27,3 +31,4 @@ jobs:
       requirements-path: ${{ inputs.requirements-path }}
       test-file-path: ${{ inputs.test-path }}
       setup-config-path: ${{ inputs.setup-config-path }}
+      localstack-docker-compose: ${{inputs.localstack-docker-compose}}
