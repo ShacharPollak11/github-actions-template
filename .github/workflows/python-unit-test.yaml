@@ -79,6 +79,6 @@ jobs:
       - name: Test with unittest
         run: python -m unittest ${{ inputs.test-file-path }}
 
-      - name: Cleanup LocalStack
+      - name: Post Setup LocalStack
         if: "${{ inputs.localstack-docker-compose != '' }}"
         run: docker-compose -f ${{ inputs.localstack-docker-compose }} down
