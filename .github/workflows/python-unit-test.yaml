@@ -57,6 +57,14 @@ jobs:
         if: "${{ inputs.setup-config-path != '' }}"
         run: |
           pip install ${{ inputs.setup-config-path }}
+          
+      - name: Fix docker-compose path (remove './' from beginning)
+        run: |
+          INPUT_PATH="${{ inputs.localstack-docker-compose }}"
+          if [[ "$INPUT_PATH" == ./* ]]; then
+              INPUT_PATH="${INPUT_PATH:2}"
+          fi
+          echo "NORMALIZED_COMPOSE_PATH=$INPUT_PATH" >> $GITHUB_ENV      
 
       - name: Setup LocalStack
         if: "${{ inputs.localstack-docker-compose != '' }}"
