@@ -31,7 +31,7 @@ on:
         default: ''
       node_version:
         type: number
-        default: 14
+        default: 16
       nx:
         type: boolean
         default: true
